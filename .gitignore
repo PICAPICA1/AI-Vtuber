@@ -219,3 +219,11 @@ data/本地问答库-ikaros.json
 config copy.json
 
 backup
+
+Live2D
+
+Miniconda3
+
+*.bat
+
+0.请安装配置ffmpeg到环境变量.txt
