@@ -82,6 +82,16 @@ class Audio:
 
         Audio.audio_player =  AUDIO_PLAYER(self.config.get("audio_player"))
 
+    # 中途插入队列优先播放，消耗性能
+    def add_queue_head(self, data):
+        #添加队列头
+        self.message_queue.put(data)
+        n = message_queue.qsize()
+        while n > 1:
+            self.message_queue.put(self.message_queue.get())        
+            n -= 1
+        return
+        
 
     # 从指定文件夹中搜索指定文件，返回搜索到的文件路径
     def search_files(self, root_dir, target_file=""):
@@ -310,6 +320,9 @@ class Audio:
                         message['user_name'] = self.common.replace_special_characters(message['user_name'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")
                         tmp_message['content'] = tmp_message['content'].format(username=message['user_name'])
                     self.message_queue.put(tmp_message)
+            # 直接复读
+            elif message['type'] == "reread":
+                self.add_queue_head(message)
             # 闲时任务
             elif message['type'] == "idle_time_task":
                 if message['content_type'] == "comment":
