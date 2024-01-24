@@ -6,11 +6,11 @@
   },
   "api_ip": "127.0.0.1",
   "api_port": 8082,
-  "platform": "talk",
-  "room_display_id": "278333",
-  "chat_type": "reread",
+  "platform": "bilibili2",
+  "room_display_id": "8604123",
+  "chat_type": "alice",
   "need_lang": "none",
-  "before_prompt": "请简要回复:",
+  "before_prompt": "",
   "after_prompt": "",
   "comment_log_type": "回答",
   "visual_body": "其他",
@@ -23,7 +23,7 @@
   },
   "play_audio": {
     "enable": true,
-    "text_split_enable": true,
+    "text_split_enable": false,
     "normal_interval": 0.5,
     "out_path": "out",
     "player": "pygame"
@@ -53,16 +53,16 @@
     "unity": true
   },
   "bilibili": {
-    "login_type": "手机扫码",
+    "login_type": "open_live",
     "username": "",
     "password": "",
     "cookie": "",
     "ac_time_value": "",
     "open_live": {
-      "ACCESS_KEY_ID": "",
-      "ACCESS_KEY_SECRET": "",
-      "APP_ID": 0,
-      "ROOM_OWNER_AUTH_CODE": ""
+      "ACCESS_KEY_ID": "9B9RVRi3B5U8vpOHUiEC227K",
+      "ACCESS_KEY_SECRET": "aAZttnnhV7KU9HHnDYKAZj0PYdq8Fy",
+      "APP_ID": 1709177966272,
+      "ROOM_OWNER_AUTH_CODE": "DALBLIW95QTC5"
     }
   },
   "twitch": {
@@ -87,8 +87,8 @@
     ]
   },
   "read_comment": {
-    "enable": true,
-    "read_username_enable": true,
+    "enable": false,
+    "read_username_enable": false,
     "username_max_len": 10,
     "voice_change": false,
     "read_username_copywriting": [
@@ -102,7 +102,9 @@
     "before_filter_str": [
       "#"
     ],
-    "after_filter_str": [],
+    "after_filter_str": [
+      "#"
+    ],
     "badwords": {
       "enable": true,
       "discard": false,
@@ -129,7 +131,7 @@
     "idle_time_task_forget_reserve_num": 1
   },
   "thanks": {
-    "entrance_enable": true,
+    "entrance_enable": false,
     "entrance_random": true,
     "username_max_len": 10,
     "entrance_copy": [
@@ -141,14 +143,14 @@
       "客官里面请~",
       "雅座一位，请~"
     ],
-    "gift_enable": true,
+    "gift_enable": false,
     "gift_random": true,
     "gift_copy": [
       "感谢{username}送的{gift_name}，爱你么么哒",
       "感谢{username}送的{gift_name}喵",
       "就送个{gift_name}？看不起谁呢？"
     ],
-    "follow_enable": true,
+    "follow_enable": false,
     "follow_random": true,
     "follow_copy": [
       "感谢{username}的关注，爱你么么哒",
@@ -162,20 +164,18 @@
     "port": 12345
   },
   "openai": {
-    "api": "https://api.openai.com/v1",
-    "api_key": [
-      "替换为你的api-key"
-    ],
+    "api": "",
+    "api_key": [],
     "model": "gpt-3.5-turbo"
   },
   "chatgpt": {
-    "model": "gpt-3.5-turbo-0613",
+    "model": "gpt-3.5-turbo",
     "temperature": 0.9,
     "max_tokens": 4096,
-    "top_p": 1.0,
+    "top_p": 0.5,
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
-    "preset": "请扮演一个AI虚拟主播。不要回答任何敏感问题！不要强调你是主播，只需要回答问题！"
+    "preset": "现在你正在blibili进行直播。"
   },
   "claude": {
     "slack_user_token": "",
@@ -191,13 +191,23 @@
     }
   },
   "chatglm": {
-    "api_ip_port": "http://127.0.0.1:8000",
-    "max_length": 2048,
-    "top_p": 0.7,
-    "temperature": 0.95,
+    "api_ip_port": "http://localhost:8000/v1/chat/completions",
+    "max_length": 4096,
+    "top_p": 0.1,
+    "temperature": 0.8,
     "max_new_tokens": 250,
     "history_enable": true,
     "history_max_len": 500
+  },
+  "alice": {
+    "api_ip_port": "http://localhost:8000/v1/chat/completions",
+    "max_length": 4096,
+    "top_p": 0.5,
+    "temperature": 0.95,
+    "max_new_tokens": 250,
+    "history_enable": true,
+    "history_max_len": 20,
+    "preset": "现在你正在bilibili网站上进行直播。"
   },
   "sparkdesk": {
     "type": "web",
@@ -264,7 +274,7 @@
     "knowledge_base": {
       "knowledge_base_name": "ikaros",
       "top_k": 3,
-      "score_threshold": 1,
+      "score_threshold": 1.0,
       "stream": false,
       "model_name": "chatglm3-6b-int4",
       "temperature": 0.7,
@@ -362,19 +372,19 @@
   },
   "local_qa": {
     "text": {
-      "enable": true,
+      "enable": false,
       "type": "json",
       "file_path": "data/本地问答库.json",
       "similarity": 0.8,
       "username_max_len": 10
     },
     "audio": {
-      "enable": true,
+      "enable": false,
       "file_path": "out/本地问答音频/",
       "similarity": 0.5
     }
   },
-  "audio_synthesis_type": "edge-tts",
+  "audio_synthesis_type": "vits",
   "audio_random_speed": {
     "normal": {
       "enable": false,
@@ -388,11 +398,11 @@
     }
   },
   "vits": {
-    "type": "vits",
-    "config_path": "E:\\vits-simple-api\\Model\\ikaros\\config.json",
+    "type": "bert_vits2",
+    "config_path": "E:\\GitRepository\\vits-simple-api\\Model\\alice\\config.json",
     "api_ip_port": "http://127.0.0.1:23456",
     "id": "0",
-    "lang": "自动",
+    "lang": "日文",
     "length": "1",
     "noise": "0.33",
     "noisew": "0.4",
@@ -402,19 +412,19 @@
   },
   "bert_vits2": {
     "type": "hiyori",
-    "api_ip_port": "http://127.0.0.1:5000",
+    "api_ip_port": "http://127.0.0.1:23456",
     "model_id": 0,
-    "speaker_name": "ikaros",
+    "speaker_name": "alice",
     "speaker_id": 0,
-    "language": "auto",
-    "length": 1,
+    "language": "JP",
+    "length": 1.0,
     "noise": 0.2,
     "noisew": 0.9,
     "sdp_radio": 0.2,
-    "auto_translate": false,
+    "auto_translate": true,
     "auto_split": false,
     "emotion": "",
-    "style_text": "",
+    "style_text": null,
     "style_weight": 0.7
   },
   "vits_fast": {
@@ -510,10 +520,12 @@
     "language": "自动识别"
   },
   "choose_song": {
-    "enable": true,
+    "enable": false,
     "similarity": 0.5,
     "start_cmd": [
-      "点歌 ",
+      "唱首",
+      "唱个",
+      "点歌",
       "唱首",
       "唱个"
     ],
@@ -565,35 +577,35 @@
       {
         "file_path": "data/copywriting/",
         "audio_path": "out/copywriting/",
+        "continuous_play_num": 2,
+        "max_play_time": 10.0,
         "play_list": [
           "test.wav",
           "伊卡日语介绍.wav",
           "吐槽.wav"
-        ],
-        "continuous_play_num": 2,
-        "max_play_time": 10.0
+        ]
       },
       {
         "file_path": "data/copywriting2/",
         "audio_path": "out/copywriting2/",
+        "continuous_play_num": 2,
+        "max_play_time": 3.0,
         "play_list": [
           "test.wav",
           "test2.wav"
-        ],
-        "continuous_play_num": 2,
-        "max_play_time": 3.0
+        ]
       }
     ],
     "audio_interval": 5.0,
     "switching_interval": 5.0,
-    "random_play": true,
+    "random_play": false,
     "auto_play": false
   },
   "header": {
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42"
   },
   "talk": {
-    "key_listener_enable": true,
+    "key_listener_enable": false,
     "device_index": "1",
     "username": "主人",
     "type": "google",
@@ -622,7 +634,8 @@
   },
   "captions": {
     "enable": true,
-    "file_path": "log/字幕.txt"
+    "file_path": "log/字幕.txt",
+    "raw_file_path": "log/原文字幕.txt"
   },
   "schedule": [
     {
@@ -659,7 +672,7 @@
       ]
     },
     "local_audio": {
-      "enable": true,
+      "enable": false,
       "random": true,
       "path": [
         "song/ikaros/枝垂樱-缩减版.mp3",
@@ -888,8 +901,7 @@
           "出其不意",
           "匪夷所思"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "c"
         ],
@@ -914,8 +926,7 @@
           "愤怒不平",
           "怒不可遏"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "v"
         ],
@@ -928,8 +939,7 @@
           "涩涩",
           "嘿嘿"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "a"
         ],
@@ -943,8 +953,7 @@
           "不悦",
           "严肃"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "s"
         ],
@@ -970,8 +979,7 @@
           "伤心落泪",
           "悲痛欲绝"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "d"
         ],
@@ -982,8 +990,7 @@
           "脸红",
           "害羞"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "f"
         ],
@@ -994,8 +1001,7 @@
           "睡觉",
           "困"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "2"
         ],
@@ -1008,8 +1014,7 @@
           "不是",
           "不对"
         ],
-        "gift": [
-        ],
+        "gift": [],
         "keys": [
           "3"
         ],
@@ -1018,14 +1023,14 @@
     ]
   },
   "translate": {
-    "enable": false,
+    "enable": true,
     "type": "baidu",
-    "trans_type": "弹幕",
+    "trans_type": "回复",
     "baidu": {
-      "appid": "",
-      "appkey": "",
+      "appid": "20231223001919435",
+      "appkey": "sCAog1XZepdaQmhflyWm",
       "from_lang": "auto",
-      "to_lang": "zh"
+      "to_lang": "jp"
     }
   },
   "abnormal_alarm": {
@@ -1106,7 +1111,7 @@
         "similarity": 0.8
       },
       "audio": {
-        "enable": true,
+        "enable": false,
         "type": "包含关系",
         "file_path": "out/本地问答音频-助播/",
         "similarity": 0.5
