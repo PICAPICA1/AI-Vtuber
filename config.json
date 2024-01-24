@@ -106,7 +106,7 @@
       "#"
     ],
     "badwords": {
-      "enable": true,
+      "enable": false,
       "discard": false,
       "path": "data/badwords.txt",
       "bad_pinyin_path": "data/违禁拼音.txt",
@@ -207,7 +207,7 @@
     "max_new_tokens": 250,
     "history_enable": true,
     "history_max_len": 20,
-    "preset": "现在你正在bilibili网站上进行直播。"
+    "preset": "现在你正在blibili进行直播。"
   },
   "sparkdesk": {
     "type": "web",
