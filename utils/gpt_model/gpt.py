@@ -10,6 +10,7 @@
 import logging
 
 from utils.gpt_model.chatglm import Chatglm
+from utils.gpt_model.alice import Qwen_alice
 from utils.gpt_model.chatgpt import Chatgpt
 from utils.gpt_model.claude import Claude
 from utils.gpt_model.claude2 import Claude2
@@ -34,6 +35,7 @@ class GPT_Model:
             "claude": Claude,
             "claude2": Claude2,
             "chatglm": Chatglm,
+            "alice": Qwen_alice,
             "text_generation_webui": TEXT_GENERATION_WEBUI,
             "sparkdesk": SPARKDESK,
             "langchain_chatglm": Langchain_ChatGLM,

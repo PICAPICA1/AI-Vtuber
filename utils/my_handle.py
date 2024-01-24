@@ -113,6 +113,7 @@ class My_handle(metaclass=SingletonMeta):
             self.claude = None
             self.claude2 = None
             self.chatglm = None
+            self.alice = None
             self.chat_with_file = None
             self.text_generation_webui = None
             self.sparkdesk = None
@@ -1008,7 +1009,7 @@ class My_handle(metaclass=SingletonMeta):
         """ 
         chat_type = My_handle.config.get("chat_type")
         # 新增LLM需要在这里追加
-        if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "chat_with_file", "text_generation_webui", \
+        if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "alice", "chat_with_file", "text_generation_webui", \
             "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
             "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini"]:
             resp_content = self.llm_handle(chat_type, data_json)
@@ -1034,6 +1035,7 @@ class My_handle(metaclass=SingletonMeta):
             # setattr(self, chat_type, GPT_MODEL.get(chat_type))
             
         resp_content = None
+        print(f'''data: {data}''')
 
         # 新增LLM需要在这里追加
         chat_model_methods = {
@@ -1042,6 +1044,7 @@ class My_handle(metaclass=SingletonMeta):
             "claude2": lambda: self.claude2.get_resp(data["content"]),
             "chatterbot": lambda: self.bot.get_response(data["content"]).text,
             "chatglm": lambda: self.chatglm.get_resp(data["content"]),
+            "alice": lambda: self.alice.get_resp(data["user_name"], data["content"]),
             "chat_with_file": lambda: self.chat_with_file.get_model_resp(data["content"]),
             "text_generation_webui": lambda: self.text_generation_webui.get_resp(data["content"]),
             "sparkdesk": lambda: self.sparkdesk.get_resp(data["content"]),
@@ -1656,7 +1659,7 @@ class My_handle(metaclass=SingletonMeta):
             """ 
             chat_type = My_handle.config.get("chat_type")
             # 新增LLM需要在这里追加
-            if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "chat_with_file", "text_generation_webui", \
+            if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "alice", "chat_with_file", "text_generation_webui", \
                 "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
                 "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini"]:
                 data_json["content"] = My_handle.config.get("before_prompt") + content + My_handle.config.get("after_prompt")
