@@ -55,7 +55,8 @@ def start_server():
         logging.error("程序初始化失败！")
         exit(0)
 
-    cooldown = 0.3 # 冷却时间 0.3 秒
+    # 冷却时间 0.5 秒
+    cooldown = 0.5 
     last_pressed = 0
 
     # HTTP API线程
