@@ -251,3 +251,9 @@ static/
 
 add_dependencies.py
 
+
+# 简洁版
+tests/
+AI-Vtuber-other其他包-自行安装补充/
+*.bat
+0.*.txt

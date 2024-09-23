@@ -51,16 +51,6 @@ global_idle_time = 0
 config_path = "config.json"
 
 
-# web服务线程
-async def web_server_thread(web_server_port):
-    Handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", web_server_port), Handler) as httpd:
-        logger.info(f"Web运行在端口：{web_server_port}")
-        logger.info(
-            f"可以直接访问Live2D页， http://127.0.0.1:{web_server_port}/Live2D/"
-        )
-        httpd.serve_forever()
-
 
 """
                        _oo0oo_
@@ -139,16 +129,6 @@ def start_server():
         logger.error("程序初始化失败！")
         os._exit(0)
 
-    # Live2D线程
-    try:
-        if config.get("live2d", "enable"):
-            web_server_port = int(config.get("live2d", "port"))
-            threading.Thread(
-                target=lambda: asyncio.run(web_server_thread(web_server_port))
-            ).start()
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        os._exit(0)
 
     if platform != "wxlive":
         # HTTP API线程
