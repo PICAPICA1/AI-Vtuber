@@ -889,24 +889,6 @@ def goto_func_page():
             logger.error(traceback.format_exc())
             return CommonResult(code=-1, message=f"失败！{e}")
 
-    # fish speech 获取说话人数据
-    async def fish_speech_web_get_ref_data(speaker):
-        if speaker == "":
-            logger.info("说话人不能为空喵~")
-            ui.notify(position="top", type="warning", message="说话人不能为空喵~")
-            return
-
-        from utils.audio_handle.my_tts import MY_TTS
-        
-        my_tts = MY_TTS(config_path)
-        data_json = await my_tts.fish_speech_web_get_ref_data(speaker)
-        if data_json is None:
-            ui.notify(position="top", type="negative", message="获取数据失败，请查看日志定位问题")
-            return
-        
-        input_fish_speech_web_ref_audio_path.value = data_json["ref_audio_path"]
-        input_fish_speech_web_ref_text.value = data_json["ref_text"]
-        ui.notify(position="top", type="positive", message="获取数据成功，已自动填入输入框")
 
         
     """
