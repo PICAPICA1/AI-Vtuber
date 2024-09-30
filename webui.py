@@ -1986,20 +1986,7 @@ def goto_func_page():
                     config_data["tongyi"]["history_max_len"] = int(input_tongyi_history_max_len.value)
                     config_data["tongyi"]["stream"] = switch_tongyi_stream.value
 
-                if config.get("webui", "show_card", "llm", "tongyixingchen"):
-                    config_data["tongyixingchen"]["access_token"] = input_tongyixingchen_access_token.value
-                    config_data["tongyixingchen"]["type"] = select_tongyixingchen_type.value
-                    config_data["tongyixingchen"]["history_enable"] = switch_tongyixingchen_history_enable.value
-                    config_data["tongyixingchen"]["history_max_len"] = int(input_tongyixingchen_history_max_len.value)
-                    config_data["tongyixingchen"]["stream"] = switch_tongyixingchen_stream.value
-                    config_data["tongyixingchen"]["固定角色"]["character_id"] = input_tongyixingchen_GDJS_character_id.value
-                    config_data["tongyixingchen"]["固定角色"]["top_p"] = round(float(input_tongyixingchen_GDJS_top_p.value), 2)
-                    config_data["tongyixingchen"]["固定角色"]["temperature"] = round(float(input_tongyixingchen_GDJS_temperature.value), 2)
-                    config_data["tongyixingchen"]["固定角色"]["seed"] = int(input_tongyixingchen_GDJS_seed.value)
-                    config_data["tongyixingchen"]["固定角色"]["user_id"] = input_tongyixingchen_GDJS_user_id.value
-                    config_data["tongyixingchen"]["固定角色"]["username"] = input_tongyixingchen_GDJS_username.value
-                    config_data["tongyixingchen"]["固定角色"]["role_name"] = input_tongyixingchen_GDJS_role_name.value
-
+                
                 if config.get("webui", "show_card", "llm", "my_wenxinworkshop"):
                     config_data["my_wenxinworkshop"]["type"] = select_my_wenxinworkshop_type.value
                     config_data["my_wenxinworkshop"]["model"] = select_my_wenxinworkshop_model.value
@@ -2027,15 +2014,7 @@ def goto_func_page():
                     config_data["dify"]["type"] = select_dify_type.value
                     config_data["dify"]["history_enable"] = switch_dify_history_enable.value
 
-                if config.get("webui", "show_card", "llm", "gpt4free"):
-                    config_data["gpt4free"]["provider"] = select_gpt4free_provider.value
-                    config_data["gpt4free"]["api_key"] = input_gpt4free_api_key.value
-                    config_data["gpt4free"]["model"] = select_gpt4free_model.value
-                    config_data["gpt4free"]["proxy"] = input_gpt4free_proxy.value
-                    config_data["gpt4free"]["max_tokens"] = int(input_gpt4free_max_tokens.value)
-                    config_data["gpt4free"]["preset"] = input_gpt4free_preset.value
-                    config_data["gpt4free"]["history_enable"] = switch_gpt4free_history_enable.value
-                    config_data["gpt4free"]["history_max_len"] = int(input_gpt4free_history_max_len.value)
+               
                 
                 if config.get("webui", "show_card", "llm", "volcengine"):
                     config_data["volcengine"]["api_key"] = input_volcengine_api_key.value
@@ -2394,7 +2373,6 @@ def goto_func_page():
                 config_data["webui"]["show_card"]["llm"]["langchain_chatchat"] = switch_webui_show_card_llm_langchain_chatchat.value
                 config_data["webui"]["show_card"]["llm"]["sparkdesk"] = switch_webui_show_card_llm_sparkdesk.value
                 config_data["webui"]["show_card"]["llm"]["tongyi"] = switch_webui_show_card_llm_tongyi.value
-                config_data["webui"]["show_card"]["llm"]["tongyixingchen"] = switch_webui_show_card_llm_tongyixingchen.value
                 config_data["webui"]["show_card"]["llm"]["my_wenxinworkshop"] = switch_webui_show_card_llm_my_wenxinworkshop.value
                 config_data["webui"]["show_card"]["llm"]["anythingllm"] = switch_webui_show_card_llm_anythingllm.value
                 config_data["webui"]["show_card"]["llm"]["dify"] = switch_webui_show_card_llm_dify.value
@@ -2519,7 +2497,6 @@ def goto_func_page():
         'sparkdesk': '讯飞星火',
         'langchain_chatchat': 'langchain_chatchat',
         'zhipu': '智谱AI',
-        'tongyixingchen': '通义星尘',
         'my_wenxinworkshop': '千帆大模型',
         'anythingllm': 'AnythingLLM',
         'tongyi': '通义千问/阿里云百炼',
@@ -3408,58 +3385,7 @@ def goto_func_page():
                         input_chatgpt_preset = ui.input(label='预设', placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。', value=config.get("chatgpt", "preset")).style("width:500px") 
 
             
-            if config.get("webui", "show_card", "llm", "chatglm"):
-                with ui.card().style(card_css):
-                    ui.label("ChatGLM1、2")
-                    with ui.row():
-                        input_chatglm_api_ip_port = ui.input(
-                            label='API地址', 
-                            placeholder='ChatGLM的API版本运行后的服务链接（需要完整的URL）', 
-                            value=config.get("chatglm", "api_ip_port"),
-                            validation={
-                                '请输入正确格式的URL': lambda value: common.is_url_check(value),
-                            }
-                        )
-                        input_chatglm_api_ip_port.style("width:400px")
-                        input_chatglm_max_length = ui.input(label='最大长度限制', placeholder='生成回答的最大长度限制，以令牌数或字符数为单位。', value=config.get("chatglm", "max_length"))
-                        input_chatglm_max_length.style("width:200px")
-                        input_chatglm_top_p = ui.input(label='前p个选择', placeholder='也称为 Nucleus采样。控制模型生成时选择概率的阈值范围。', value=config.get("chatglm", "top_p"))
-                        input_chatglm_top_p.style("width:200px")
-                        input_chatglm_temperature = ui.input(label='温度', placeholder='温度参数，控制生成文本的随机性。较高的温度值会产生-更多的随机性和多样性。', value=config.get("chatglm", "temperature"))
-                        input_chatglm_temperature.style("width:200px")
-                    with ui.row():
-                        switch_chatglm_history_enable = ui.switch('上下文记忆', value=config.get("chatglm", "history_enable")).style(switch_internal_css)
-                        input_chatglm_history_max_len = ui.input(label='最大记忆长度', placeholder='最大记忆的上下文字符数量，不建议设置过大，容易爆显存，自行根据情况配置', value=config.get("chatglm", "history_max_len"))
-                        input_chatglm_history_max_len.style("width:200px")
             
-            if config.get("webui", "show_card", "llm", "qwen"):
-                with ui.card().style(card_css):
-                    ui.label("Qwen")
-                    with ui.row():
-                        input_qwen_api_ip_port = ui.input(
-                            label='API地址', 
-                            placeholder='ChatGLM的API版本运行后的服务链接（需要完整的URL）', 
-                            value=config.get("qwen", "api_ip_port"),
-                            validation={
-                                '请输入正确格式的URL': lambda value: common.is_url_check(value),
-                            }
-                        )
-                        input_qwen_api_ip_port.style("width:400px")
-                        input_qwen_max_length = ui.input(label='最大长度限制', placeholder='生成回答的最大长度限制，以令牌数或字符数为单位。', value=config.get("qwen", "max_length"))
-                        input_qwen_max_length.style("width:200px")
-                        input_qwen_top_p = ui.input(label='前p个选择', placeholder='也称为 Nucleus采样。控制模型生成时选择概率的阈值范围。', value=config.get("qwen", "top_p"))
-                        input_qwen_top_p.style("width:200px")
-                        input_qwen_temperature = ui.input(label='温度', placeholder='温度参数，控制生成文本的随机性。较高的温度值会产生更多的随机性和多样性。', value=config.get("qwen", "temperature"))
-                        input_qwen_temperature.style("width:200px")
-                    with ui.row():
-                        switch_qwen_history_enable = ui.switch('上下文记忆', value=config.get("qwen", "history_enable")).style(switch_internal_css)
-                        input_qwen_history_max_len = ui.input(label='最大记忆轮数', placeholder='最大记忆的上下文轮次数量，不建议设置过大，容易爆显存，自行根据情况配置', value=config.get("qwen", "history_max_len"))
-                        input_qwen_history_max_len.style("width:200px")
-                        input_qwen_preset = ui.input(label='预设',
-                                                        placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。',
-                                                        value=config.get("chatgpt", "preset")).style("width:500px")
-
-           
             if config.get("webui", "show_card", "llm", "chatterbot"):
                 with ui.card().style(card_css):
                     ui.label("Chatterbot")
@@ -3515,34 +3441,6 @@ def goto_func_page():
                             ).style("width:100px") 
                             input_sparkdesk_assistant_id = ui.input(label='助手ID', value=config.get("sparkdesk", "assistant_id"), placeholder='助手创作中心，创建助手后助手API的接口地址最后的助手ID').style("width:100px") 
                             
-            if config.get("webui", "show_card", "llm", "langchain_chatglm"):  
-                with ui.card().style(card_css):
-                    ui.label("Langchain_ChatGLM")
-                    with ui.row():
-                        input_langchain_chatglm_api_ip_port = ui.input(
-                            label='API地址', 
-                            placeholder='langchain_chatglm的API版本运行后的服务链接（需要完整的URL）', 
-                            value=config.get("langchain_chatglm", "api_ip_port"),
-                            validation={
-                                '请输入正确格式的URL': lambda value: common.is_url_check(value),
-                            }
-                        )
-                        input_langchain_chatglm_api_ip_port.style("width:400px")
-                        lines = ["模型", "知识库", "必应"]
-                        data_json = {}
-                        for line in lines:
-                            data_json[line] = line
-                        select_langchain_chatglm_chat_type = ui.select(
-                            label='类型', 
-                            options=data_json, 
-                            value=config.get("langchain_chatglm", "chat_type")
-                        )
-                    with ui.row():
-                        input_langchain_chatglm_knowledge_base_id = ui.input(label='知识库名称', placeholder='本地存在的知识库名称，日志也有输出知识库列表，可以查看', value=config.get("langchain_chatglm", "knowledge_base_id"))
-                        input_langchain_chatglm_knowledge_base_id.style("width:400px")
-                        switch_langchain_chatglm_history_enable = ui.switch('上下文记忆', value=config.get("langchain_chatglm", "history_enable")).style(switch_internal_css)
-                        input_langchain_chatglm_history_max_len = ui.input(label='最大记忆长度', placeholder='最大记忆的上下文字符数量，不建议设置过大，容易爆显存，自行根据情况配置', value=config.get("langchain_chatglm", "history_max_len"))
-                        input_langchain_chatglm_history_max_len.style("width:400px")
             
             if config.get("webui", "show_card", "llm", "langchain_chatchat"):  
                 with ui.card().style(card_css):
@@ -3659,44 +3557,8 @@ def goto_func_page():
                         switch_zhipu_remove_useless = ui.switch('删除无用字符', value=config.get("zhipu", "remove_useless")).style(switch_internal_css)
                         switch_zhipu_stream = ui.switch('流式输出', value=config.get("zhipu", "stream")).tooltip("是否开启流式输出，开启后，回答会逐句输出，关闭后，回答会一次性输出。")
                     
-            if config.get("webui", "show_card", "llm", "bard"):  
-                with ui.card().style(card_css):
-                    ui.label("Bard")
-                    with ui.grid(columns=2):
-                        input_bard_token = ui.input(label='token', placeholder='登录bard，打开F12，在cookie中获取 __Secure-1PSID 对应的值', value=config.get("bard", "token"))
-                        input_bard_token.style("width:400px")
+          
             
-            
-            if config.get("webui", "show_card", "llm", "tongyixingchen"): 
-                with ui.card().style(card_css):
-                    ui.label("通义星尘")
-                    with ui.row():
-                        input_tongyixingchen_access_token = ui.input(label='密钥', value=config.get("tongyixingchen", "access_token"), placeholder='官网申请开通API-KEY，然后找官方申请调用权限')
-                        lines = ['固定角色']
-                        data_json = {}
-                        for line in lines:
-                            data_json[line] = line
-                        select_tongyixingchen_type = ui.select(
-                            label='类型', 
-                            options=data_json, 
-                            value=config.get("tongyixingchen", "type")
-                        ).style("width:100px")
-                        switch_tongyixingchen_history_enable = ui.switch('上下文记忆', value=config.get("tongyixingchen", "history_enable")).style(switch_internal_css)
-                        input_tongyixingchen_history_max_len = ui.input(label='最大记忆长度', value=config.get("tongyixingchen", "history_max_len"), placeholder='最长能记忆的问答字符串长度，超长会丢弃最早记忆的内容，请慎用！配置过大可能会有丢大米')
-                        switch_tongyixingchen_stream = ui.switch('流式输出', value=config.get("tongyixingchen", "stream")).tooltip("是否开启流式输出，开启后，回答会逐句输出，关闭后，回答会一次性输出。")
-                    
-                    with ui.card().style(card_css):
-                        ui.label("固定角色")
-                        with ui.row():
-                            input_tongyixingchen_GDJS_character_id = ui.input(label='角色ID', value=config.get("tongyixingchen", "固定角色", "character_id"), placeholder='官网聊天页，创建的角色，然后点开角色的信息，可以看见ID')
-                            input_tongyixingchen_GDJS_top_p = ui.input(label='top_p', value=config.get("tongyixingchen", "固定角色", "top_p"), placeholder='topP生成时，核采样方法的概率阈值。例如，取值为0.8时，仅保留累计概率之和大于等于0.8的概率分布中的token，作为随机采样的候选集。取值范围为(0,1.0)，取值越大，生成的随机性越高；取值越低，生成的随机性越低。默认值 0.95。注意，取值不要大于等于1')
-                            input_tongyixingchen_GDJS_temperature = ui.input(label='temperature', value=config.get("tongyixingchen", "固定角色", "temperature"), placeholder='较高的值将使输出更加随机，而较低的值将使输出更加集中和确定。可选，默认取值0.92')
-                            input_tongyixingchen_GDJS_seed = ui.input(label='seed', value=config.get("tongyixingchen", "固定角色", "seed"), placeholder='seed生成时，随机数的种子，用于控制模型生成的随机性。如果使用相同的种子，每次运行生成的结果都将相同；当需要复现模型的生成结果时，可以使用相同的种子。seed参数支持无符号64位整数类型。默认值 1683806810')
-                        with ui.row():
-                            input_tongyixingchen_GDJS_user_id = ui.input(label='用户ID', value=config.get("tongyixingchen", "固定角色", "user_id"), placeholder='业务系统用户唯一标识，同一用户不能并行对话，必须待上次对话回复结束后才可发起下轮对话')
-                            input_tongyixingchen_GDJS_username = ui.input(label='对话用户名称', value=config.get("tongyixingchen", "固定角色", "username"), placeholder='对话用户名称，即你的名字')
-                            input_tongyixingchen_GDJS_role_name = ui.input(label='固定角色名称', value=config.get("tongyixingchen", "固定角色", "role_name"), placeholder='角色ID对应的角色名称，自己编写的别告诉我你不知道！')
-
             if config.get("webui", "show_card", "llm", "my_wenxinworkshop"): 
                 with ui.card().style(card_css):
                     ui.label("千帆大模型")
@@ -3861,72 +3723,7 @@ def goto_func_page():
                         input_tongyi_history_max_len = ui.input(label='最大记忆长度', value=config.get("tongyi", "history_max_len"), placeholder='最长能记忆的问答字符串长度，超长会丢弃最早记忆的内容，请慎用！配置过大可能会有丢大米')
                         switch_tongyi_stream = ui.switch('流式输出', value=config.get("tongyi", "stream")).tooltip("是否开启流式输出，开启后，回答会逐句输出，关闭后，回答会一次性输出。")
                     
-            if config.get("webui", "show_card", "llm", "gpt4free"):
-                with ui.card().style(card_css):
-                    ui.label("GPT4Free")
-                    with ui.row():
-                        providers = [
-                            "none",
-                            "g4f.Provider.Bing",
-                            "g4f.Provider.ChatgptAi",
-                            "g4f.Provider.Liaobots",
-                            "g4f.Provider.OpenaiChat",
-                            "g4f.Provider.Raycast",
-                            "g4f.Provider.Theb",
-                            "g4f.Provider.You",
-                            "g4f.Provider.AItianhuSpace",
-                            "g4f.Provider.ChatForAi",
-                            "g4f.Provider.Chatgpt4Online",
-                            "g4f.Provider.ChatgptNext",
-                            "g4f.Provider.ChatgptX",
-                            "g4f.Provider.FlowGpt",
-                            "g4f.Provider.GptTalkRu",
-                            "g4f.Provider.Koala",
-                        ]
-                        # 将用户配置的值插入list（如果不存在）
-                        if config.get("gpt4free", "provider") not in providers:
-                            providers.append(config.get("gpt4free", "provider"))
-                        data_json = {}
-                        for line in providers:
-                            data_json[line] = line
-                        select_gpt4free_provider = ui.select(
-                            label='供应商', 
-                            options=data_json, 
-                            value=config.get("gpt4free", "provider"),
-                            with_input=True,
-                            new_value_mode='add-unique',
-                            clearable=True
-                        )
-                        input_gpt4free_api_key = ui.input(label='API密钥', placeholder='API KEY，支持代理', value=config.get("gpt4free", "api_key")).style("width:300px;")
-                        # button_gpt4free_test = ui.button('测试', on_click=lambda: test_openai_key(), color=button_bottom_color).style(button_bottom_css)
-
-                        gpt4free_models = [
-                            "gpt-3.5-turbo",
-                            "gpt-4",
-                            "gpt-4-turbo",
-                        ]
-                        # 将用户配置的值插入list（如果不存在）
-                        if config.get("gpt4free", "model") not in gpt4free_models:
-                            gpt4free_models.append(config.get("gpt4free", "model"))
-                        data_json = {}
-                        for line in gpt4free_models:
-                            data_json[line] = line
-                        select_gpt4free_model = ui.select(
-                            label='模型', 
-                            options=data_json, 
-                            value=config.get("gpt4free", "model"),
-                            with_input=True,
-                            new_value_mode='add-unique',
-                            clearable=True
-                        )
-                        input_gpt4free_proxy = ui.input(label='HTTP代理地址', placeholder='HTTP代理地址', value=config.get("gpt4free", "proxy")).style("width:300px;")
-                    with ui.row():
-                        input_gpt4free_max_tokens = ui.input(label='最大token数', value=config.get("gpt4free", "max_tokens"), placeholder='限制生成回答的最大长度。').style("width:200px;")
-                    
-                        input_gpt4free_preset = ui.input(label='预设', value=config.get("gpt4free", "preset"), placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。').style("width:500px") 
-                        switch_gpt4free_history_enable = ui.switch('上下文记忆', value=config.get("gpt4free", "history_enable")).style(switch_internal_css)
-                        input_gpt4free_history_max_len = ui.input(label='最大记忆长度', value=config.get("gpt4free", "history_max_len"), placeholder='最长能记忆的问答字符串长度，超长会丢弃最早记忆的内容，请慎用！配置过大可能会有丢大米')
-
+            
             if config.get("webui", "show_card", "llm", "dify"):
                 with ui.card().style(card_css):
                     ui.label("Dify")
@@ -5099,8 +4896,6 @@ def goto_func_page():
                         switch_webui_show_card_llm_langchain_chatchat = ui.switch('langchain_chatchat', value=config.get("webui", "show_card", "llm", "langchain_chatchat")).style(switch_internal_css)
                         switch_webui_show_card_llm_sparkdesk = ui.switch('讯飞星火', value=config.get("webui", "show_card", "llm", "sparkdesk")).style(switch_internal_css)
                         switch_webui_show_card_llm_tongyi = ui.switch('通义千问', value=config.get("webui", "show_card", "llm", "tongyi")).style(switch_internal_css)
-                        switch_webui_show_card_llm_tongyixingchen = ui.switch('通义星尘', value=config.get("webui", "show_card", "llm", "tongyixingchen")).style(switch_internal_css)
-                        # switch_webui_show_card_llm_my_qianfan = ui.switch('my_qianfan', value=config.get("webui", "show_card", "llm", "my_qianfan")).style(switch_internal_css)
                         switch_webui_show_card_llm_my_wenxinworkshop = ui.switch('千帆大模型', value=config.get("webui", "show_card", "llm", "my_wenxinworkshop")).style(switch_internal_css)
                         switch_webui_show_card_llm_anythingllm = ui.switch('AnythingLLM', value=config.get("webui", "show_card", "llm", "anythingllm")).style(switch_internal_css)
                         switch_webui_show_card_llm_dify = ui.switch('Dify', value=config.get("webui", "show_card", "llm", "dify")).style(switch_internal_css)

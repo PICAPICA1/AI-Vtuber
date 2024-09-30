@@ -59,7 +59,6 @@ av==12.3.0
     # via faster-whisper
 azure-cognitiveservices-speech==1.38.0
 baidu-aip==4.16.13
-bardapi==1.0.0
 beautifulsoup4==4.9.3
     # via bilibili-api-python
 betterproto==2.0.0b6

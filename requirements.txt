@@ -48,7 +48,6 @@ urllib3==2.2.2
 pyhandytools
 curl_cffi
 zhipuai
-bardapi
 revTongYi
 pyautogui
 nicegui==1.4.30

@@ -282,48 +282,6 @@
     "preset": "请扮演一个AI虚拟主播。不要回答任何敏感问题！不要强调你是主播，只需要回答问题！",
     "stream": true
   },
-  "gpt4free": {
-    "provider": "",
-    "api_key": "",
-    "model": "gpt-3.5-turbo",
-    "max_tokens": 2048,
-    "proxy": "http://127.0.0.1:10809",
-    "preset": "请扮演一个AI虚拟主播。不要回答任何敏感问题！不要强调你是主播，只需要回答问题！",
-    "history_enable": true,
-    "history_max_len": 300
-  },
-  "claude": {
-    "slack_user_token": "",
-    "bot_user_id": ""
-  },
-  "claude2": {
-    "cookie": "",
-    "use_proxy": false,
-    "proxies": {
-      "http": "http://127.0.0.1:10809",
-      "https": "http://127.0.0.1:10809",
-      "socks5": "socks://127.0.0.1:10808"
-    }
-  },
-  "chatglm": {
-    "api_ip_port": "http://127.0.0.1:8000",
-    "max_length": 2048,
-    "top_p": 0.7,
-    "temperature": 0.95,
-    "max_new_tokens": 250,
-    "history_enable": true,
-    "history_max_len": 500
-  },
-  "qwen": {
-    "api_ip_port": "http://localhost:8000/v1/chat/completions",
-    "max_length": 4096,
-    "top_p": 0.5,
-    "temperature": 0.95,
-    "max_new_tokens": 250,
-    "history_enable": true,
-    "history_max_len": 20,
-    "preset": "请扮演一个AI虚拟主播。不要回答任何敏感问题！不要强调你是主播，只需要回答问题！"
-  },
   "sparkdesk": {
     "type": "api",
     "cookie": "",
@@ -362,13 +320,6 @@
     "local_max_query": 3,
     "local_vector_embedding_model": "sebastian-hofstaetter/distilbert-dot-tas_b-b256-msmarco"
   },
-  "langchain_chatglm": {
-    "api_ip_port": "http://127.0.0.1:7861",
-    "chat_type": "模型",
-    "knowledge_base_id": "ikaros",
-    "history_enable": true,
-    "history_max_len": 500
-  },
   "langchain_chatchat": {
     "api_ip_port": "http://127.0.0.1:7861",
     "chat_type": "模型",
@@ -406,24 +357,6 @@
     "name": "bot",
     "db_path": "db.sqlite3"
   },
-  "text_generation_webui": {
-    "type": "coyude",
-    "api_ip_port": "http://127.0.0.1:5000",
-    "max_new_tokens": 250,
-    "mode": "chat",
-    "character": "Example",
-    "instruction_template": "Vicuna-v1.1",
-    "your_name": "主人",
-    "top_p": 1.0,
-    "top_k": 40,
-    "temperature": 0.7,
-    "seed": -1.0,
-    "history_enable": true,
-    "history_max_len": 500
-  },
-  "bard": {
-    "token": ""
-  },
   "tongyi": {
     "cookie_path": "cookie/tongyi.json",
     "type": "api",
@@ -438,32 +371,6 @@
     "history_enable": true,
     "history_max_len": 300,
     "stream": true
-  },
-  "tongyixingchen": {
-    "access_token": "此处填写你的密钥",
-    "type": "固定角色",
-    "固定角色": {
-      "character_id": "1b34205ee8814acc9e7acf593e7cf759",
-      "top_p": 0.95,
-      "temperature": 0.92,
-      "seed": 1683806810,
-      "user_id": "1",
-      "username": "主人",
-      "role_name": "伊卡洛斯"
-    },
-    "history_enable": true,
-    "history_max_len": 300,
-    "stream": true
-  },
-  "my_qianfan": {
-    "model": "ERNIE-Bot-turbo",
-    "access_key": "",
-    "secret_key": "",
-    "top_p": 0.8,
-    "temperature": 0.9,
-    "penalty_score": 1.0,
-    "history_enable": true,
-    "history_max_len": 300
   },
   "my_wenxinworkshop": {
     "type": "千帆大模型",
@@ -491,35 +398,6 @@
     "history_enable": true,
     "history_max_len": 4096
   },
-  "qanything": {
-    "type": "online",
-    "app_key": "",
-    "app_secret": "",
-    "api_ip_port": "http://127.0.0.1:8777",
-    "user_id": "zzp",
-    "kb_ids": [
-      "KB938fb10c8a924530abf1754ea620b7cd"
-    ],
-    "history_enable": true,
-    "history_max_len": 300
-  },
-  "koboldcpp": {
-    "api_ip_port": "http://127.0.0.1:5001",
-    "max_context_length": 2048,
-    "max_length": 100,
-    "quiet": false,
-    "rep_pen": 1.1,
-    "rep_pen_range": 256,
-    "rep_pen_slope": 1,
-    "temperature": 0.5,
-    "tfs": 1,
-    "top_a": 0,
-    "top_k": 3,
-    "top_p": 0.9,
-    "typical": 1,
-    "history_enable": true,
-    "history_max_len": 600
-  },
   "anythingllm": {
     "api_ip_port": "http://127.0.0.1:3001",
     "api_key": "S1PPG9B-YP2M8NX-Q64ZBF1-Y4K5DCS",
@@ -539,25 +417,6 @@
     "history_enable": true,
     "history_max_len": 1024,
     "stream": true
-  },
-  "llm_tpu": {
-    "api_ip_port": "http://127.0.0.1:8003",
-    "max_length": 1,
-    "top_p": 0.8,
-    "temperature": 0.95,
-    "history_enable": true,
-    "history_max_len": 100
-  },
-  "custom_llm": {
-    "url": "http://127.0.0.1:11434/v1/chat/completions",
-    "headers": "Content-Type:application/json\nAuthorization:Bearer sk",
-    "method": "POST",
-    "proxies": "{}",
-    "body_type": "json",
-    "body": "{\"model\":\"qwen:latest\",\"messages\":[{\"role\":\"user\",\"content\":\"{{prompt}}\"}]}",
-    "resp_data_type": "json",
-    "data_analysis": "resp[\"choices\"][0][\"message\"][\"content\"]",
-    "resp_template": "{data}"
   },
   "local_qa": {
     "periodic_trigger": {
@@ -1894,29 +1753,17 @@
       },
       "llm": {
         "chatgpt": true,
-        "claude": true,
-        "chatglm": true,
-        "qwen": true,
         "zhipu": true,
         "chat_with_file": true,
-        "langchain_chatglm": true,
         "langchain_chatchat": true,
         "chatterbot": true,
-        "text_generation_webui": true,
         "sparkdesk": true,
-        "bard": true,
         "tongyi": true,
-        "tongyixingchen": true,
         "my_wenxinworkshop": true,
         "gemini": true,
-        "qanything": true,
-        "koboldcpp": true,
         "anythingllm": true,
-        "gpt4free": true,
         "dify": true,
-        "volcengine": true,
-        "llm_tpu": true,
-        "custom_llm": true
+        "volcengine": true
       },
       "tts": {
         "edge-tts": true,
