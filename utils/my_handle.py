@@ -46,28 +46,6 @@ class My_handle(metaclass=SingletonMeta):
     # 是否在数据处理中
     is_handleing = 0
 
-    # 异常报警数据
-    abnormal_alarm_data = {
-        "platform": {
-            "error_count": 0
-        },
-        "llm": {
-            "error_count": 0
-        },
-        "tts": {
-            "error_count": 0
-        },
-        "svc": {
-            "error_count": 0
-        },
-        "visual_body": {
-            "error_count": 0
-        },
-        "other": {
-            "error_count": 0
-        }
-    }
-
     # 直播消息存储(入场、礼物、弹幕)，用于限定时间内的去重
     live_data = {
         "comment": [],
@@ -617,7 +595,6 @@ class My_handle(metaclass=SingletonMeta):
                 follow 用户关注
                 schedule 定时任务
                 idle_time_task 闲时任务
-                abnormal_alarm 异常报警
                 image_recognition_schedule 图像识别定时任务
 
         """
@@ -1489,7 +1466,6 @@ class My_handle(metaclass=SingletonMeta):
 
             # 返回为空，触发异常报警
             if resp_content is None:
-                self.abnormal_alarm_handle("llm")
                 logger.warning("LLM没有正确返回数据，请排查配置、网络等是否正常。如果排查后都没有问题，可能是接口改动导致的兼容性问题，可以前往官方仓库提交issue，传送门：https://github.com/Ikaros-521/AI-Vtuber/issues")
             
             # 是否启用webui回显
@@ -1676,7 +1652,6 @@ class My_handle(metaclass=SingletonMeta):
 
             # 返回为空，触发异常报警
             else:
-                self.abnormal_alarm_handle("llm")
                 logger.warning("LLM没有正确返回数据，请排查配置、网络等是否正常。如果排查后都没有问题，可能是接口改动导致的兼容性问题，可以前往官方仓库提交issue，传送门：https://github.com/Ikaros-521/AI-Vtuber/issues")
             
             # 是否启用webui回显
@@ -3716,67 +3691,4 @@ class My_handle(metaclass=SingletonMeta):
 
         # 默认间隔为0.1秒
         return intervals.get(timer_flag, 0.1)
-
-
-    """
-    异常报警
-    """ 
-    def abnormal_alarm_handle(self, type):
-        """异常报警
-
-        Args:
-            type (str): 报警类型
-
-        Returns:
-            bool: True/False
-        """
-
-        try:
-            My_handle.abnormal_alarm_data[type]["error_count"] += 1
-
-            if not My_handle.config.get("abnormal_alarm", type, "enable"):
-                return True
-            
-            if My_handle.config.get("abnormal_alarm", type, "type") == "local_audio":
-                # 是否错误数大于 自动重启错误数
-                if My_handle.abnormal_alarm_data[type]["error_count"] >= My_handle.config.get("abnormal_alarm", type, "auto_restart_error_num"):
-                    data = {
-                        "type": "restart",
-                        "api_type": "api",
-                        "data": {
-                            "config_path": "config.json"
-                        }
-                    }
-
-                    webui_ip = "127.0.0.1" if My_handle.config.get("webui", "ip") == "0.0.0.0" else My_handle.config.get("webui", "ip")
-                    My_handle.common.send_request(f'http://{webui_ip}:{My_handle.config.get("webui", "port")}/sys_cmd', "POST", data)
-
-                # 是否错误数小于 开始报警错误数，是则不触发报警
-                if My_handle.abnormal_alarm_data[type]["error_count"] < My_handle.config.get("abnormal_alarm", type, "start_alarm_error_num"):
-                    return
-
-                path_list = My_handle.common.get_all_file_paths(My_handle.config.get("abnormal_alarm", type, "local_audio_path"))
-
-                # 随机选择列表中的一个元素
-                audio_path = random.choice(path_list)
-
-                message = {
-                    "type": "abnormal_alarm",
-                    "tts_type": My_handle.config.get("audio_synthesis_type"),
-                    "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
-                    "config": My_handle.config.get("filter"),
-                    "username": "系统",
-                    "content": os.path.join(My_handle.config.get("abnormal_alarm", type, "local_audio_path"), My_handle.common.extract_filename(audio_path, True))
-                }
-
-                logger.warning(f"【异常报警-{type}】 {My_handle.common.extract_filename(audio_path, False)}")
-
-                self.audio_synthesis_handle(message)
-
-        except Exception as e:
-            logger.error(traceback.format_exc())
-
-            return False
-
-        return True
 

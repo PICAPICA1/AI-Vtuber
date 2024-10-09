@@ -45,27 +45,7 @@ class Audio:
     # 第一次触发voice_tmp_path_queue_not_empty标志
     voice_tmp_path_queue_not_empty_flag = False
 
-    # 异常报警数据
-    abnormal_alarm_data = {
-        "platform": {
-            "error_count": 0
-        },
-        "llm": {
-            "error_count": 0
-        },
-        "tts": {
-            "error_count": 0
-        },
-        "svc": {
-            "error_count": 0
-        },
-        "visual_body": {
-            "error_count": 0
-        },
-        "other": {
-            "error_count": 0
-        }
-    }
+    
 
     def __init__(self, config_path, type=1):
         self.config_path = config_path  
@@ -516,7 +496,6 @@ class Audio:
             follow 用户关注
             schedule 定时任务
             idle_time_task 闲时任务
-            abnormal_alarm 异常报警
             image_recognition_schedule 图像识别定时任务
             trends_copywriting 动态文案
         """
@@ -640,23 +619,7 @@ class Audio:
                 if self.config.get("play_audio", "enable"):
                     self.data_priority_insert("等待合成消息", data_json)
                 return
-            # 异常报警
-            elif message['type'] == "abnormal_alarm":
-                # 拼接json数据，存入队列
-                data_json = {
-                    "type": message['type'],
-                    "tts_type": "none",
-                    "voice_path": message['content'],
-                    "content": message["content"]
-                }
-
-                if "insert_index" in data_json:
-                    data_json["insert_index"] = message["insert_index"]
-
-                # 是否开启了音频播放 
-                if self.config.get("play_audio", "enable"):
-                    self.data_priority_insert("等待合成消息", data_json)
-                return
+            
             # 是否为本地问答音频
             elif message['type'] == "local_qa_audio":
                 # 拼接json数据，存入队列
@@ -797,7 +760,6 @@ class Audio:
                 logger.info(f"ddsp-svc合成成功，输出到={voice_tmp_path}")
             else:
                 logger.error(f"ddsp-svc合成失败，请检查配置")
-                self.abnormal_alarm_handle("svc")
                 return None
 
         # 转换为绝对路径
@@ -810,7 +772,6 @@ class Audio:
                 logger.info(f"so_vits_svc合成成功，输出到={voice_tmp_path}")
             else:
                 logger.error(f"so_vits_svc合成失败，请检查配置")
-                self.abnormal_alarm_handle("svc")
                 
                 return None
         
@@ -1270,7 +1231,6 @@ class Audio:
         
         if voice_tmp_path is None:
             logger.error(f"{message['tts_type']}合成失败，请排查服务端是否启动、是否正常，配置、网络等问题。如果排查后都没有问题，可能是接口改动导致的兼容性问题，可以前往官方仓库提交issue，传送门：https://github.com/Ikaros-521/AI-Vtuber/issues")
-            self.abnormal_alarm_handle("tts")
             
             return False
         
@@ -2198,7 +2158,6 @@ class Audio:
                         retry_count -= 1  # 减少重试次数
                         if retry_count <= 0:
                             logger.error(f"重试次数用尽，{audio_synthesis_type}合成最终失败，请排查配置、网络等问题")
-                            self.abnormal_alarm_handle("tts")
                             return
 
             # 进行音频合并 输出到文案音频路径
@@ -2223,67 +2182,3 @@ class Audio:
     其他
     """
     
-    """
-    异常报警
-    """
-    def abnormal_alarm_handle(self, type):
-        """异常报警
-
-        Args:
-            type (str): 报警类型
-
-        Returns:
-            bool: True/False
-        """
-
-        try:
-            Audio.abnormal_alarm_data[type]["error_count"] += 1
-
-            if not self.config.get("abnormal_alarm", type, "enable"):
-                return True
-
-            logger.debug(f"abnormal_alarm_handle type={type}, error_count={Audio.abnormal_alarm_data[type]['error_count']}")
-
-            if self.config.get("abnormal_alarm", type, "type") == "local_audio":
-                # 是否错误数大于 自动重启错误数
-                if Audio.abnormal_alarm_data[type]["error_count"] >= self.config.get("abnormal_alarm", type, "auto_restart_error_num"):
-                    logger.warning(f"【异常报警-{type}】 出错数超过自动重启错误数，即将自动重启")
-                    data = {
-                        "type": "restart",
-                        "api_type": "api",
-                        "data": {
-                            "config_path": "config.json"
-                        }
-                    }
-
-                    webui_ip = "127.0.0.1" if self.config.get("webui", "ip") == "0.0.0.0" else self.config.get("webui", "ip")
-                    self.common.send_request(f'http://{webui_ip}:{self.config.get("webui", "port")}/sys_cmd', "POST", data)
-                    
-                # 是否错误数小于 开始报警错误数，是则不触发报警
-                if Audio.abnormal_alarm_data[type]["error_count"] < self.config.get("abnormal_alarm", type, "start_alarm_error_num"):
-                    return
-                
-                path_list = self.common.get_all_file_paths(self.config.get("abnormal_alarm", type, "local_audio_path"))
-
-                # 随机选择列表中的一个元素
-                audio_path = random.choice(path_list)
-
-                data_json = {
-                    "type": "abnormal_alarm",
-                    "tts_type": self.config.get("audio_synthesis_type"),
-                    "data": self.config.get(self.config.get("audio_synthesis_type")),
-                    "config": self.config.get("filter"),
-                    "username": "系统",
-                    "content": os.path.join(self.config.get("abnormal_alarm", type, "local_audio_path"), self.common.extract_filename(audio_path, True))
-                }
-
-                logger.warning(f"【异常报警-{type}】 {self.common.extract_filename(audio_path, False)}")
-
-                self.audio_synthesis(data_json)
-
-        except Exception as e:
-            logger.error(traceback.format_exc())
-
-            return False
-
-        return True

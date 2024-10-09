@@ -154,7 +154,6 @@
     "voice_tmp_path_queue_min_start_play": 0,
     "priority_mapping": {
       "copywriting": 1,
-      "abnormal_alarm": 1,
       "trends_copywriting": 10,
       "schedule": 10,
       "idle_time_task": 10,
@@ -352,10 +351,6 @@
     },
     "history_enable": true,
     "history_max_len": 300
-  },
-  "chatterbot": {
-    "name": "bot",
-    "db_path": "db.sqlite3"
   },
   "tongyi": {
     "cookie_path": "cookie/tongyi.json",
@@ -1528,50 +1523,6 @@
       "tgt_lang": "en"
     }
   },
-  "abnormal_alarm": {
-    "platform": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警/platform"
-    },
-    "llm": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警/llm"
-    },
-    "tts": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警/tts"
-    },
-    "svc": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警/svc"
-    },
-    "visual_body": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警"
-    },
-    "other": {
-      "enable": false,
-      "start_alarm_error_num": 5,
-      "auto_restart_error_num": 10,
-      "type": "local_audio",
-      "local_audio_path": "data/异常报警"
-    }
-  },
   "trends_config": {
     "enable": true,
     "path": [
@@ -1748,7 +1699,6 @@
         "key_mapping": true,
         "custom_cmd": true,
         "trends_config": true,
-        "abnormal_alarm": true,
         "coordination_program": true
       },
       "llm": {
@@ -1756,7 +1706,6 @@
         "zhipu": true,
         "chat_with_file": true,
         "langchain_chatchat": true,
-        "chatterbot": true,
         "sparkdesk": true,
         "tongyi": true,
         "my_wenxinworkshop": true,

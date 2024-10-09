@@ -1561,7 +1561,6 @@ def start_server():
             room = live.LiveDanmaku(my_handle.get_room_id(), credential=credential)
         except Exception as e:
             logger.error(traceback.format_exc())
-            my_handle.abnormal_alarm_handle("platform")
             # os._exit(0)
 
         """
@@ -1785,7 +1784,6 @@ def start_server():
 
         except Exception as e:
             logger.error(traceback.format_exc())
-            my_handle.abnormal_alarm_handle("platform")
 
         async def main_func():
             global session
@@ -2168,7 +2166,6 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("数据解析错误！")
-                    my_handle.abnormal_alarm_handle("platform")
                     continue
 
         async def ws_server():
@@ -2845,7 +2842,6 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("数据解析错误！")
-                    my_handle.abnormal_alarm_handle("platform")
                     continue
 
         async def ws_server():
@@ -2883,7 +2879,6 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("请检查配置文件")
-                    my_handle.abnormal_alarm_handle("platform")
                     exit()
 
             def find_file(self, find_path, file_type) -> list:
@@ -3157,7 +3152,6 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("数据解析错误！")
-                    my_handle.abnormal_alarm_handle("platform")
                     continue
 
         async def ws_server():
@@ -3360,7 +3354,6 @@ def start_server():
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error("获取Twitch配置失败！\n{0}".format(e))
-                my_handle.abnormal_alarm_handle("platform")
 
             # 配置代理服务器
             socks.set_default_proxy(socks.HTTP, proxy_server, proxy_port)
@@ -3374,7 +3367,6 @@ def start_server():
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error(f"连接 Twitch IRC server 失败: {e}")
-                my_handle.abnormal_alarm_handle("platform")
 
             sock.send(f"PASS {token}\n".encode("utf-8"))
             sock.send(f"NICK {nickname}\n".encode("utf-8"))
@@ -3422,7 +3414,6 @@ def start_server():
                     logger.error(traceback.format_exc())
                     logger.error(f"捕获到异常: {e}")
                     logger.error("发生异常，重新连接socket")
-                    my_handle.abnormal_alarm_handle("platform")
 
                     if retry_count >= 3:
                         logger.error(f"多次重连失败，程序结束！")
@@ -3450,10 +3441,8 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("Error receiving chat: {0}".format(e))
-                    my_handle.abnormal_alarm_handle("platform")
         except Exception as e:
             logger.error(traceback.format_exc())
-            my_handle.abnormal_alarm_handle("platform")
     elif platform == "wxlive":
         import uvicorn
         from fastapi import FastAPI, Request
@@ -3534,7 +3523,6 @@ def start_server():
                 return CommonResult(code=200, message="成功接收")
             except Exception as e:
                 logger.error(traceback.format_exc())
-                my_handle.abnormal_alarm_handle("platform")
                 return CommonResult(code=-1, message=f"发送数据失败！{e}")
 
         # 定义POST请求路径和处理函数
@@ -3652,7 +3640,6 @@ def start_server():
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error("Error receiving chat: {0}".format(e))
-                    my_handle.abnormal_alarm_handle("platform")
                     break  # 退出内部while循环以触发重连机制
 
         try:
@@ -3722,7 +3709,6 @@ def start_server():
                     logger.error("获取弹幕数据失败。。。")
             except Exception as e:
                 logger.error(traceback.format_exc())
-                my_handle.abnormal_alarm_handle("platform")
 
         while True:
             fetch_comments()
