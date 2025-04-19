@@ -45,6 +45,13 @@ class Audio:
     # 第一次触发voice_tmp_path_queue_not_empty标志
     voice_tmp_path_queue_not_empty_flag = False
 
+    # 动作映射结果缓存队列
+    action_mapping_queue = []
+    # 动作映射结果缓存大小上限
+    action_mapping_queue_max_size = 100
+    # 连续未匹配动作计数
+    no_match_count = 0
+
     # 异常报警数据
     abnormal_alarm_data = {
         "platform": {
@@ -1306,6 +1313,14 @@ class Audio:
             # 更新音频路径
             data_json["voice_path"] = voice_tmp_path
 
+            # 动作映射
+            if self.config.get("action_mapping", "enable") and message['type'] in ["comment"]:
+                logger.warning(data_json)
+                # 将音频路径转换为音频url，如E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
+                # 其中127.0.0.1:8081 是webui的ip和端口，从config中读取，如果ip为0.0.0.0，则表示为使用上网卡的ip做为url的ip
+                audio_url = self.convert_path_to_url(voice_tmp_path)
+                self.action_mapping_handle(message["content"], audio_url)
+
             # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
             if self.config.get("play_audio", "enable"):
                 self.data_priority_insert("待播放音频列表", data_json)
@@ -2384,3 +2399,314 @@ class Audio:
             return False
 
         return True
+
+
+    # 动作映射处理
+    def action_mapping_handle(self, llm_content: str, audio_url: str):
+        """
+        根据LLM生成内容匹配并判定对应的动作
+        
+        参数:
+            llm_content: LLM生成的内容文本
+            audio_url: 音频文件url
+            
+        返回:
+            dict: 包含匹配结果的字典，格式如下:
+                {
+                    "action_name": 匹配到的动作名称,
+                    "action_group": 匹配到的动作组,
+                    "match_word": 匹配到的关键词,
+                    "priority": 匹配优先级,
+                    "timestamp": 匹配时间戳,
+                    "id": 动作ID
+                }
+                如果没有匹配到任何动作，则返回None
+        """
+        try:
+            if not llm_content:
+                return None
+                
+            # 获取配置
+            action_config = self.config.get("action_mapping")
+            if not action_config:
+                return None
+                
+            # 根据llm_content进行动作映射
+            action_groups = action_config.get("groups", [])
+            if not action_groups:
+                logger.info("动作映射配置中没有定义动作组")
+                return None
+                
+            logger.info(f"开始匹配文本: {llm_content}")
+            
+            # 初始化变量
+            matched_actions = []  # 存储所有匹配结果
+            
+            # 先检查是否有「」包围的动作名称
+            import re
+            name_matches = re.findall(r'「(.+?)」', llm_content)
+            logger.info(f"从「」中提取的可能动作名称: {name_matches}")
+            
+            # 如果找到「」中的内容，尝试匹配动作名称
+            if name_matches:
+                for name_match in name_matches:
+                    # 遍历所有动作组查找匹配
+                    for group in action_groups:
+                        group_id = group.get("id")
+                        actions = group.get("actions", [])
+                        
+                        for action in actions:
+                            action_name = action.get("name", "")
+                            priority = action.get("priority", 0)
+                            
+                            # 检查是否精确匹配动作名称
+                            if action_name and action_name == name_match:
+                                logger.info(f"在「」中找到精确匹配动作名称: {action_name}")
+                                # 找到精确匹配，直接返回结果
+                                matched_result = {
+                                    "action_name": action_name,
+                                    "action_group": group_id,
+                                    "match_word": action_name,
+                                    "priority": priority,
+                                    "audio_url": audio_url,
+                                    "content": llm_content
+                                }
+                                
+                                # 添加时间戳并存入队列
+                                import time
+                                matched_result["timestamp"] = int(time.time())
+                                matched_result["id"] = len(Audio.action_mapping_queue) + 1
+                                
+                                # 添加到队列中
+                                Audio.action_mapping_queue.append(matched_result)
+                                
+                                # 如果队列超出最大长度，删除最早的记录
+                                if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
+                                    Audio.action_mapping_queue.pop(0)
+                                
+                                # 重置未匹配计数
+                                Audio.no_match_count = 0
+                                
+                                logger.info(f"最终动作映射结果(从「」中精确匹配): {matched_result}")
+                                return matched_result
+            
+            # 如果没有在「」中找到匹配的动作名称，则尝试从全文匹配关键词
+            logger.info("在「」中未找到精确匹配，尝试匹配关键词")
+            
+            # 遍历所有动作组
+            for group in action_groups:
+                group_id = group.get("id")
+                actions = group.get("actions", [])
+                
+                # logger.info(f"检查动作组 {group_id}, 包含 {len(actions)} 个动作")
+                
+                for action in actions:
+                    action_name = action.get("name", "")
+                    match_words = action.get("match_words", [])
+                    priority = action.get("priority", 0)
+                    
+                    # 检查是否匹配关键词
+                    for word in match_words:
+                        # 英文匹配不区分大小写
+                        if word.isascii():
+                            if word.lower() in llm_content.lower():
+                                logger.info(f"匹配到英文关键词: {word}")
+                                matched_actions.append({
+                                    "action_name": action_name,
+                                    "action_group": group_id,
+                                    "match_word": word,
+                                    "priority": priority,
+                                    "audio_url": audio_url,
+                                    "content": llm_content
+                                })
+                        else:
+                            if word in llm_content:
+                                logger.info(f"匹配到中文关键词: {word}")
+                                matched_actions.append({
+                                    "action_name": action_name,
+                                    "action_group": group_id,
+                                    "match_word": word,
+                                    "priority": priority,
+                                    "audio_url": audio_url,
+                                    "content": llm_content
+                                })
+            
+            # 匹配结果
+            matched_result = None
+            
+            # 处理关键词匹配的情况
+            if matched_actions:
+                # 按照优先级从高到低排序
+                matched_actions.sort(key=lambda x: x["priority"], reverse=True)
+                
+                # 获取最高优先级
+                highest_priority = matched_actions[0]["priority"]
+                logger.info(f"最高匹配优先级: {highest_priority}")
+                
+                # 筛选出最高优先级的动作
+                highest_priority_actions = [a for a in matched_actions if a["priority"] == highest_priority]
+                
+                # 同优先级随机选一个
+                import random
+                selected_action = random.choice(highest_priority_actions)
+                logger.info(f"从{len(highest_priority_actions)}个同优先级动作中随机选择: {selected_action['action_name']}")
+                
+                matched_result = selected_action
+            
+            # 若未匹配到任何动作，检查是否需要强制匹配动作组1
+            if not matched_result:
+                Audio.no_match_count += 1
+                logger.info(f"未匹配到任何动作，连续未匹配计数: {Audio.no_match_count}")
+                
+                if Audio.no_match_count >= 3:
+                    # 连续三次未匹配，强制匹配动作组1
+                    Audio.no_match_count = 0
+                    
+                    # 从动作组1中随机选择一个动作
+                    group_1_actions = []
+                    for group in action_groups:
+                        if group.get("id") == 1:
+                            group_1_actions = group.get("actions", [])
+                            break
+                    
+                    if group_1_actions:
+                        import random
+                        selected_action = random.choice(group_1_actions)
+                        matched_result = {
+                            "action_name": selected_action.get("name", ""),
+                            "action_group": 1,
+                            "match_word": "强制匹配",
+                            "priority": selected_action.get("priority", 0),
+                            "audio_url": audio_url,
+                            "content": llm_content
+                        }
+                        logger.info(f"连续三次未匹配，强制匹配动作组1: {matched_result['action_name']}")
+            else:
+                # 重置未匹配计数
+                Audio.no_match_count = 0
+            
+            # 如果有匹配结果，添加时间戳并存入队列
+            if matched_result:
+                import time
+                matched_result["timestamp"] = int(time.time())
+                matched_result["id"] = len(Audio.action_mapping_queue) + 1
+                
+                # 添加到队列中
+                Audio.action_mapping_queue.append(matched_result)
+                
+                # 如果队列超出最大长度，删除最早的记录
+                if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
+                    Audio.action_mapping_queue.pop(0)
+                
+                logger.info(f"最终动作映射结果: {matched_result}")
+            else:
+                logger.info("没有匹配到任何动作")
+            
+            return matched_result
+            
+        except Exception as e:
+            logger.error(f"动作映射处理出错: {e}")
+            logger.error(traceback.format_exc())
+            return None
+
+    # 获取动作映射队列
+    def get_action_mapping_queue(self, limit=None):
+        """
+        获取动作映射结果缓存队列
+        
+        Args:
+            limit: 返回的记录数量限制，None表示返回全部
+            
+        Returns:
+            dict: 包含动作映射记录的字典
+        """
+        try:
+            if limit is not None and isinstance(limit, int) and limit > 0:
+                result_data = Audio.action_mapping_queue[-limit:]
+            else:
+                result_data = Audio.action_mapping_queue.copy()
+                
+            # 确保返回一个字典，而不是列表
+            return {"data": result_data, "count": len(result_data)}
+        except Exception as e:
+            logger.error(f"获取动作映射队列出错: {e}")
+            return {"data": [], "count": 0}
+    
+    # 删除动作映射队列中的记录
+    def delete_action_mapping(self, action_id=None, delete_all=False):
+        """
+        删除动作映射队列中的记录
+        
+        参数:
+            action_id: 要删除的动作ID，None表示不按ID删除
+            delete_all: 是否删除所有记录
+            
+        返回:
+            bool: 是否删除成功
+        """
+        try:
+            if not Audio.action_mapping_queue:
+                return False
+            
+            # 删除所有记录
+            if delete_all:
+                Audio.action_mapping_queue = []
+                return True
+            
+            # 删除指定ID的记录
+            if action_id is not None:
+                for i, item in enumerate(Audio.action_mapping_queue):
+                    if item.get("id") == action_id:
+                        Audio.action_mapping_queue.pop(i)
+                        return True
+            
+            return False
+        except Exception as e:
+            logger.error(f"删除动作映射记录出错: {e}")
+            logger.error(traceback.format_exc())
+            return False
+
+    # 将本地文件路径转换为URL
+    def convert_path_to_url(self, file_path):
+        """
+        将本地文件路径转换为URL
+        例如：E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 
+        转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
+        
+        参数:
+            file_path: 本地文件路径
+            
+        返回:
+            str: 转换后的URL
+        """
+        try:
+            if not file_path:
+                return ""
+                
+            # 获取WebUI的IP和端口
+            webui_ip = self.config.get("webui", "ip")
+            webui_port = self.config.get("webui", "port")
+            
+            # 如果IP是0.0.0.0，使用127.0.0.1替代
+            if webui_ip == "0.0.0.0":
+                webui_ip = "127.0.0.1"
+            
+            # 获取工作目录的绝对路径
+            import os
+            workspace_path = os.path.abspath(".")
+            
+            # 将文件路径转换为相对于工作目录的路径
+            relative_path = os.path.relpath(file_path, workspace_path)
+            # 替换反斜杠为正斜杠
+            relative_path = relative_path.replace("\\", "/")
+            
+            # 构建URL
+            url = f"http://{webui_ip}:{webui_port}/{relative_path}"
+            
+            logger.debug(f"转换文件路径: {file_path} -> URL: {url}")
+            
+            return url
+        except Exception as e:
+            logger.error(f"转换文件路径为URL时出错: {e}")
+            logger.error(traceback.format_exc())
+            return ""

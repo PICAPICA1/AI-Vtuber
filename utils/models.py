@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
     
 class SetConfigMessage(BaseModel):
     config_path: str
@@ -38,3 +38,21 @@ class CommonResult(BaseModel):
     code: int
     message: str
     data: Optional[Dict[str, Any]] = None
+
+# 动作映射记录模型
+class ActionMappingRecord(BaseModel):
+    id: int
+    action_name: str
+    action_group: int
+    match_word: str
+    priority: int
+    timestamp: int
+
+# 动作映射查询参数模型
+class ActionMappingQuery(BaseModel):
+    limit: Optional[int] = None
+
+# 动作映射删除参数模型
+class ActionMappingDelete(BaseModel):
+    action_id: Optional[int] = None
+    delete_all: Optional[bool] = False

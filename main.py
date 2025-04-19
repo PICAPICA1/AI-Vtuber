@@ -12,7 +12,7 @@ from functools import partial
 from typing import *
 
 # 按键监听语音聊天板块
-import keyboard
+# import keyboard
 import pyaudio
 import wave
 import numpy as np
@@ -264,6 +264,10 @@ def start_server():
                         logger.info(f"内部HTTP API callback接口 音频播放完成回调，待播放音频数量：{my_global.wait_play_audio_num}，待合成消息数量：{my_global.wait_synthesis_msg_num}")
                     else:
                         logger.info(f"内部HTTP API callback接口收到数据：{data_json}")
+                        
+                        # 处理LLM回调消息
+                        if data_json["type"] == "llm":
+                            my_handle.process_callback_message(data_json)
 
                     # 音频播放完成
                     if data_json["type"] in ["audio_playback_completed"]:
@@ -307,7 +311,44 @@ def start_server():
                     logger.error(f"get_sys_info处理失败！{e}")
                     return CommonResult(code=-1, message=f"get_sys_info处理失败！{e}")
 
+            # 获取动作映射记录接口
+            @app.get("/get_action_mapping")
+            async def get_action_mapping(limit: int = None):
+                """
+                获取动作映射记录
+                
+                参数:
+                    limit: 返回的记录数量限制，None表示返回全部
+                """
+                try:
+                    data = my_handle.get_action_mapping_queue(limit)
+                    # 确保data是一个字典
+                    if not isinstance(data, dict):
+                        data = {"data": data if data is not None else [], "count": len(data) if data is not None else 0}
+                    return CommonResult(code=200, data=data, message="获取动作映射记录成功！")
+                except Exception as e:
+                    logger.error(f"获取动作映射记录失败！{e}")
+                    return CommonResult(code=-1, message=f"获取动作映射记录失败！{e}", data={})
             
+            # 删除动作映射记录接口
+            @app.post("/delete_action_mapping")
+            async def delete_action_mapping(action_id: int = None, delete_all: bool = False):
+                """
+                删除动作映射记录
+                
+                参数:
+                    action_id: 要删除的动作ID，None表示不按ID删除
+                    delete_all: 是否删除所有记录
+                """
+                try:
+                    result = my_handle.delete_action_mapping(action_id, delete_all)
+                    if result:
+                        return CommonResult(code=200, message="删除动作映射记录成功！")
+                    else:
+                        return CommonResult(code=400, message="删除动作映射记录失败，没有找到相关记录！")
+                except Exception as e:
+                    logger.error(f"删除动作映射记录失败！{e}")
+                    return CommonResult(code=-1, message=f"删除动作映射记录失败！{e}")
 
             logger.info("HTTP API线程已启动！")
 
@@ -350,6 +391,7 @@ def start_server():
         logger.info("Recording...")
         flag = 0
         while 1:
+            return
             while keyboard.is_pressed("RIGHT_SHIFT"):
                 flag = 1
                 data = stream.read(CHUNK)
@@ -934,6 +976,7 @@ def start_server():
 
     # 按键监听
     def key_listener():
+        return
         # 注册按键按下事件的回调函数
         keyboard.on_press(on_key_press)
 

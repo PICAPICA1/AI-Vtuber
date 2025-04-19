@@ -78,6 +78,7 @@ class My_handle(metaclass=SingletonMeta):
         "entrance": [],
     }
 
+
     # 各个任务运行数据缓存 暂时用于 限定任务周期性触发
     task_data = {
         "read_comment": {
@@ -1653,7 +1654,7 @@ class My_handle(metaclass=SingletonMeta):
             # 是否启用webui回显
             if webui_show and resp_content:
                 self.webui_show_chat_log_callback(chat_type, data, resp_content)
-
+            
             return resp_content
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -4281,3 +4282,39 @@ class My_handle(metaclass=SingletonMeta):
 
         return True
 
+    
+            
+    
+    # 处理WebUI的回调消息
+    def process_callback_message(self, data_json):
+        """处理WebUI的回调消息，例如LLM回复等"""
+        try:
+            message_type = data_json.get("type")
+            
+            if message_type == "llm":
+                llm_data = data_json.get("data", {})
+                content = llm_data.get("content", "")
+                
+                logger.info(f"收到LLM回调消息，内容: {content}")
+                
+                # 对LLM回复内容应用动作映射
+                if self.config.get("action_mapping", "enable") and content:
+                    logger.info(f"对LLM回调内容应用动作映射: {content}")
+                    action_result = self.action_mapping_handle(content)
+                    if action_result:
+                        logger.info(f"LLM回调消息动作映射结果: {action_result}")
+            
+            return True
+        except Exception as e:
+            logger.error(f"处理WebUI回调消息出错: {e}")
+            logger.error(traceback.format_exc())
+            return False
+
+    # 获取动作映射队列
+    def get_action_mapping_queue(self, limit=None):
+        return self.audio.get_action_mapping_queue(limit)
+    
+    # 获取动作映射队列
+    def delete_action_mapping(self, limit=None):
+        return self.audio.delete_action_mapping(limit)
+    
