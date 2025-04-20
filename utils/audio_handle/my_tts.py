@@ -1270,9 +1270,91 @@ class MY_TTS:
                     logger.error(f'cosyvoice未知错误，请检查您的CosyVoice API是否启动/配置是否正确，报错内容: {e}')
                 
                 return None
+            elif data["type"] == "api":
+                # 统一的API接口，根据tts_type区分不同的合成类型
+                tts_type = data["api"]["tts_type"]
+                
+                if tts_type == "tts":
+                    # 内置角色语音合成
+                    url = f"{data['api_ip_port']}/tts"
+                    
+                    params = {
+                        "text": data["content"],
+                        "role": data["api"]["api_params"]["voice"],
+                        "speed": float(data["api"]["api_params"]["speed"]),
+                        "version": data["api"]["api_params"]["version"]
+                    }
+                    
+                    logger.debug(f"CosyVoice TTS 请求参数: {params}")
+                    
+                    try:
+                        return await self.download_audio("cosyvoice_tts", url, self.timeout, request_type="post", json_data=params)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error(f'CosyVoice TTS API 错误，请检查您的 CosyVoice API 是否启动/配置是否正确，报错内容: {e}')
+                
+                elif tts_type == "clone":
+                    # 跨语言声音克隆
+                    url = f"{data['api_ip_port']}/clone"
+                    
+                    params = {
+                        "text": data["content"],
+                        "reference_audio": data["api"]["api_params"]["reference_audio"],
+                        "speed": float(data["api"]["api_params"]["speed"])
+                    }
+                    
+                    logger.debug(f"CosyVoice 跨语言克隆请求参数: {params}")
+                    
+                    try:
+                        return await self.download_audio("cosyvoice_clone", url, self.timeout, request_type="post", json_data=params)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error(f'CosyVoice 跨语言克隆 API 错误，请检查您的 CosyVoice API 是否启动/配置是否正确，报错内容: {e}')
+                
+                elif tts_type == "clone_eq":
+                    # 同语言声音克隆
+                    url = f"{data['api_ip_port']}/clone_eq"
+                    
+                    params = {
+                        "text": data["content"],
+                        "reference_audio": data["api"]["api_params"]["reference_audio"],
+                        "reference_text": data["api"]["api_params"]["reference_text"],
+                        "speed": float(data["api"]["api_params"]["speed"])
+                    }
+                    
+                    logger.debug(f"CosyVoice 同语言克隆请求参数: {params}")
+                    
+                    try:
+                        return await self.download_audio("cosyvoice_clone_eq", url, self.timeout, request_type="post", json_data=params)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error(f'CosyVoice 同语言克隆 API 错误，请检查您的 CosyVoice API 是否启动/配置是否正确，报错内容: {e}')
+                
+                elif tts_type == "openai":
+                    # OpenAI 兼容接口
+                    url = f"{data['api_ip_port']}/v1/audio/speech"
+                    
+                    params = {
+                        "model": "tts-1",
+                        "input": data["content"],
+                        "voice": data["api"]["api_params"]["voice"],
+                        "speed": float(data["api"]["api_params"]["speed"]),
+                        "response_format": "wav"
+                    }
+                    
+                    logger.debug(f"CosyVoice OpenAI 兼容接口请求参数: {params}")
+                    
+                    try:
+                        return await self.download_audio("cosyvoice_openai", url, self.timeout, request_type="post", json_data=params)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error(f'CosyVoice OpenAI 兼容接口错误，请检查您的 CosyVoice API 是否启动/配置是否正确，报错内容: {e}')
+                
+                return None
+            
         except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error(f'CosyVoice未知错误，请检查您的CosyVoice WebUI是否启动/配置是否正确，报错内容: {e}')
+            logger.error(f'CosyVoice未知错误，请检查您的CosyVoice API是否启动/配置是否正确，报错内容: {e}')
         
         return None
 

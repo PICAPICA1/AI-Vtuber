@@ -2850,6 +2850,16 @@ def goto_func_page():
                             "new": (input_cosyvoice_api_0819_new, 'int'),
                             "speed": (input_cosyvoice_api_0819_speed, 'float'),
                         },
+                        "api": {
+                            "tts_type": (select_cosyvoice_api_tts_type, 'str'),
+                            "api_params": {
+                                "voice": (input_cosyvoice_api_params_voice, 'str'),
+                                "speed": (input_cosyvoice_api_params_speed, 'float'),
+                                "version": (select_cosyvoice_api_params_version, 'str'),
+                                "reference_audio": (input_cosyvoice_api_params_reference_audio, 'str'),
+                                "reference_text": (input_cosyvoice_api_params_reference_text, 'str'),
+                            }
+                        }
                     }
                 if config.get("webui", "show_card", "tts", "f5_tts"):
                     config_mapping["f5_tts"] = {
@@ -6220,7 +6230,7 @@ def goto_func_page():
                     with ui.row():
                         select_cosyvoice_type = ui.select(
                             label='类型', 
-                            options={"api_0819": "api_0819", "gradio_0707": "gradio_0707"}, 
+                            options={"api_0819": "api_0819", "gradio_0707": "gradio_0707", "api": "api"}, 
                             value=config.get("cosyvoice", "type")
                         ).style("width:150px").tooltip("对接的API类型")
                         input_cosyvoice_gradio_ip_port = ui.input(
@@ -6265,6 +6275,49 @@ def goto_func_page():
                                 input_cosyvoice_api_0819_speaker = ui.input(label='说话人', value=config.get("cosyvoice", "api_0819", "speaker"), placeholder='').style("width:200px;").tooltip("自行查看")
                                 input_cosyvoice_api_0819_new = ui.input(label='new', value=config.get("cosyvoice", "api_0819", "new"), placeholder='0').style("width:200px;").tooltip("自行查看")
                                 input_cosyvoice_api_0819_speed = ui.input(label='语速', value=config.get("cosyvoice", "api_0819", "speed"), placeholder='1').style("width:200px;").tooltip("语速")
+                    # 添加新的 api 类型配置选项
+                    with ui.row():
+                        with ui.card().style(card_css):
+                            ui.label("api")
+                            with ui.row():
+                                # tts_type 选择
+                                select_cosyvoice_api_tts_type = ui.select(
+                                    label='合成类型', 
+                                    options={'tts': '内置角色', 'clone': "同语言克隆", 'clone_eq': "跨语言克隆", 'openai': "openai"},
+                                    value=config.get("cosyvoice", "api", "tts_type"),
+                                ).style("width:200px;").tooltip("选择使用的合成类型")
+
+                                input_cosyvoice_api_params_speed = ui.input(
+                                    label='语速', 
+                                    value=config.get("cosyvoice", "api", "api_params", "speed"), 
+                                    placeholder='1.0'
+                                ).style("width:200px;").tooltip("语速，范围 0.5-2.0")
+
+                                input_cosyvoice_api_params_voice = ui.input(
+                                    label='角色',
+                                    value=config.get("cosyvoice", "api", "api_params", "voice"), 
+                                    placeholder='中文女'
+                                ).style("width:200px;").tooltip("内置角色名称，如：中文女、中文男、日语男等")
+                                
+                                select_cosyvoice_api_params_version = ui.select(
+                                    label='版本',
+                                    options=["v1", "v2"],
+                                    value=config.get("cosyvoice", "api", "api_params", "version"),
+                                ).style("width:200px;").tooltip("模型版本，v1速度快但质量较低，v2质量好但速度较慢")
+                        
+                            with ui.row():
+                                input_cosyvoice_api_params_reference_audio = ui.input(
+                                    label='参考音频路径',
+                                    value=config.get("cosyvoice", "api", "api_params", "reference_audio"), 
+                                    placeholder='音频文件路径'
+                                ).style("width:400px;").tooltip("参考音频文件路径，用于克隆声音")
+                                
+                                input_cosyvoice_api_params_reference_text = ui.input(
+                                    label='参考文本',
+                                    value=config.get("cosyvoice", "api", "api_params", "reference_text"), 
+                                    placeholder='参考音频对应的文本内容'
+                                ).style("width:400px;").tooltip("参考音频对应的文本内容")
+                                
             
             if config.get("webui", "show_card", "tts", "f5_tts"): 
                 with ui.card().style(card_css):
