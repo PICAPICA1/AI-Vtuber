@@ -528,41 +528,45 @@ class Common:
 
     # 文本切分算法
     def split_sentences(self, text):
-        # 使用正则表达式切分句子
-        sentences = re.split(r'(?<=[。！？!?])', text)
-        result = []
-        current_sentence = ""
-        
-        for sentence in sentences:
-            # 去除换行和空格
-            sentence = sentence.replace('\n', '')
+        try:
+            # 使用正则表达式切分句子
+            sentences = re.split(r'(?<=[。！？!?])', text)
+            result = []
+            current_sentence = ""
             
-            # 如果句子为空则跳过
-            if not sentence:
-                continue
-            
-            # 如果句子长度小于10个字，则与下一句合并
-            if len(current_sentence) < 10:
-                current_sentence += sentence
-            else:
-                # 判断当前句子是否以标点符号结尾
-                if current_sentence[-1] in ["。", "！", "？", ".", "!", "?"]:
-                    result.append(current_sentence)
-                    current_sentence = sentence
+            for sentence in sentences:
+                # 去除换行和空格
+                sentence = sentence.replace('\n', '')
+                
+                # 如果句子为空则跳过
+                if not sentence:
+                    continue
+                
+                # 如果句子长度小于10个字，则与下一句合并
+                if len(current_sentence) < 10:
+                    current_sentence += sentence
                 else:
-                    # 如果当前句子不以标点符号结尾，则进行二次切分
-                    split_sentences = re.split(r'(?<=[,，;；])', current_sentence)
-                    if len(split_sentences) > 1:
-                        result.extend(split_sentences[:-1])
-                        current_sentence = split_sentences[-1] + sentence
+                    # 判断当前句子是否以标点符号结尾
+                    if current_sentence[-1] in ["。", "！", "？", ".", "!", "?"]:
+                        result.append(current_sentence)
+                        current_sentence = sentence
                     else:
-                        current_sentence += sentence
-        
-        # 添加最后一句
-        if current_sentence:
-            result.append(current_sentence)
-        
-        return result
+                        # 如果当前句子不以标点符号结尾，则进行二次切分
+                        split_sentences = re.split(r'(?<=[,，;；])', current_sentence)
+                        if len(split_sentences) > 1:
+                            result.extend(split_sentences[:-1])
+                            current_sentence = split_sentences[-1] + sentence
+                        else:
+                            current_sentence += sentence
+            
+            # 添加最后一句
+            if current_sentence:
+                result.append(current_sentence)
+            
+            return result
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            return []
 
 
     # 字符串匹配算法来计算字符串之间的相似度，并选择匹配度最高的字符串作为结果

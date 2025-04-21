@@ -239,6 +239,111 @@ class Chatgpt:
             logger.error(traceback.format_exc())
             return None
     
+    # 处理带图像的请求
+    def get_resp_with_img(self, prompt, img_data):
+        """
+        使用OpenAI标准接口处理带图像的请求
+        
+        Args:
+            prompt: 文本内容
+            img_data: 图片数据，可以是图片路径字符串或已编码的图片数据
+            
+        Returns:
+            OpenAI接口的响应内容
+        """
+        try:
+            # 检查 img_data 的类型
+            if isinstance(img_data, str):  # 如果是字符串，假定为文件路径
+                import base64
+
+                # 读取本地图片文件
+                with open(img_data, "rb") as image_file:
+                    # 将图片内容转换为base64编码
+                    img = base64.b64encode(image_file.read()).decode("utf-8")
+            else:
+                img = img_data
+
+            # 检查OpenAI API密钥
+            max_length = len(self.data_openai['api_key']) - 1
+
+            if not self.data_openai['api_key']:
+                logger.error("请设置openai Api Key")
+                return None
+            else:
+                # 判断是否所有 API key 均已达到速率限制
+                if self.current_key_index > max_length:
+                    self.current_key_index = 0
+                    logger.warning("全部Key均已达到速率限制,请等待一分钟后再尝试")
+                    return None
+                
+            # 设置API基础URL和密钥
+            openai.api_base = self.data_openai['api']
+            openai.api_key = self.data_openai['api_key'][self.current_key_index]
+            
+            logger.debug(f"openai.__version__={openai.__version__}")
+            
+            # 准备消息
+            messages = [
+                {"role": "system", "content": self.data_chatgpt["preset"]},
+                {
+                    "role": "user", 
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img}"}}
+                    ]
+                }
+            ]
+            
+            # 判断openai库版本，1.x.x和0.x.x有破坏性更新
+            if version.parse(openai.__version__) >= version.parse('1.0.0'):
+                logger.info(f"base_url={openai.api_base}, api_key={openai.api_key}")
+                
+                client = openai.OpenAI(base_url=openai.api_base, api_key=openai.api_key)
+                
+                # 调用OpenAI接口
+                response = client.chat.completions.create(
+                    model=self.data_chatgpt.get("model", "gpt-4-vision-preview"),
+                    messages=messages,
+                    max_tokens=self.data_chatgpt.get("max_tokens", 500),
+                    timeout=60,
+                    # stream=True
+                )
+                
+                resp_content = response.choices[0].message.content
+            else:
+                # 旧版OpenAI库不支持vision API，返回错误
+                logger.error("OpenAI库版本过低，不支持图像处理功能，请升级到1.0.0以上版本")
+                return "OpenAI库版本过低，不支持图像处理功能，请升级到1.0.0以上版本"
+            
+            logger.debug(f"resp_content={resp_content}")
+            
+            return resp_content
+            
+        except openai.OpenAIError as e:
+            if str(e).__contains__("Rate limit reached") and self.current_key_index <= max_length:
+                self.current_key_index = self.current_key_index + 1
+                logger.warning("速率限制，尝试切换key")
+                msg = self.get_resp_with_img(prompt, img_data)
+                return msg
+            elif str(e).__contains__("Your access was terminated") and self.current_key_index <= max_length:
+                logger.warning("请及时确认该Key: " + str(openai.api_key) + " 是否正常，若异常，请移除")
+                
+                # 判断是否所有 API key 均已尝试
+                if self.current_key_index + 1 > max_length:
+                    return str(e)
+                else:
+                    logger.warning("访问被阻止，尝试切换Key")
+                    self.current_key_index = self.current_key_index + 1
+                    msg = self.get_resp_with_img(prompt, img_data)
+                    return msg
+            else:
+                logger.error('openai 接口报错: ' + str(e))
+                return None
+                
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            return None
+        
     # 添加AI返回消息到会话，用于提供上下文记忆
     def add_assistant_msg_to_session(self, username, message):
         try:

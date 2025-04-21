@@ -5,7 +5,7 @@
     "password": "123456",
     "ums_api": "http://127.0.0.1:1119"
   },
-  "api_ip": "192.168.3.181",
+  "api_ip": "192.168.3.186",
   "api_port": 8082,
   "platform": "bilibili2",
   "room_display_id": "278333",
@@ -1157,11 +1157,11 @@
     }
   },
   "image_recognition": {
-    "enable": false,
-    "model": "gemini",
+    "enable": true,
+    "model": "openai",
     "img_save_path": "./out/图像识别",
     "prompt": "请讲解一下图片里的内容",
-    "screenshot_window_title": "None",
+    "screenshot_window_title": "微信",
     "screenshot_delay": 3.0,
     "loop_screenshot_enable": false,
     "loop_screenshot_delay": 15,
@@ -1182,6 +1182,20 @@
     },
     "blip": {
       "model": "Salesforce/blip-image-captioning-large"
+    },
+    "openai": {
+      "api_key": [
+        "sk-"
+      ],
+      "api": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen-vl-plus",
+      "temperature": 0.9,
+      "max_tokens": 4096,
+      "top_p": 1.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "preset": "你是一个直播主持人，你的身后正在播放游戏《星际公民》实况直播",
+      "stream": true
     }
   },
   "captions": {
@@ -1912,7 +1926,7 @@
     }
   },
   "webui": {
-    "ip": "192.168.3.181",
+    "ip": "192.168.3.186",
     "port": 8081,
     "title": "AI Vtuber",
     "auto_run": false,

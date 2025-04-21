@@ -1609,6 +1609,8 @@ class My_handle(metaclass=SingletonMeta):
                     "gemini": lambda: self.image_recognition_model.get_resp_with_img(data["content"], data["img_data"]),
                     "zhipu": lambda: self.image_recognition_model.get_resp_with_img(data["content"], data["img_data"]),
                     "blip": lambda: self.image_recognition_model.get_resp_with_img(data["content"], data["img_data"]),
+                    "openai": lambda: self.image_recognition_model.get_resp_with_img(data["content"], data["img_data"]),
+                    
                 }
 
             # 使用字典映射的方式来获取响应内容
