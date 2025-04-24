@@ -430,7 +430,7 @@ async def audio_speech(request: OpenAITTSRequest):
     ```python
     from openai import OpenAI
     
-    client = OpenAI(api_key='12314', base_url='http://127.0.0.1:9933/v1')
+    client = OpenAI(api_key='12314', base_url='http://192.168.3.99:9933/v1')
     response = client.audio.speech.create(
         model='tts-1',
         voice='中文女',

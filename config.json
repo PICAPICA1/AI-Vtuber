@@ -5,7 +5,7 @@
     "password": "123456",
     "ums_api": "http://127.0.0.1:1119"
   },
-  "api_ip": "192.168.3.193",
+  "api_ip": "192.168.2.89",
   "api_port": 8082,
   "platform": "bilibili2",
   "room_display_id": "278333",
@@ -300,13 +300,13 @@
     "name": "Hiyori"
   },
   "openai": {
-    "api": "http://127.0.0.1:11434/v1",
+    "api": "http://192.168.2.228:11434/v1",
     "api_key": [
-      "api-key"
+      "sk"
     ]
   },
   "chatgpt": {
-    "model": "qwen:7b-chat-q5_K_M",
+    "model": "qwq:32b-fp16",
     "temperature": 0.9,
     "max_tokens": 4096,
     "top_p": 1.0,
@@ -934,8 +934,8 @@
   },
   "cosyvoice": {
     "type": "api",
-    "gradio_ip_port": "http://127.0.0.1:9886",
-    "api_ip_port": "http://127.0.0.1:9933",
+    "gradio_ip_port": "http://192.168.3.99:9886",
+    "api_ip_port": "http://192.168.3.99:9933",
     "gradio_0707": {
       "mode_checkbox_group": "预训练音色",
       "sft_dropdown": "中文女",
@@ -953,8 +953,8 @@
     "api": {
       "tts_type": "clone",
       "api_params": {
-        "reference_audio": "C:\\Users\\Administrator\\Music\\光动嘴不如亲自做给你看.wav",
-        "reference_text": "光动嘴不如亲自做给你看",
+        "reference_audio": "/root/CosyVoice/tmp/1.wav",
+        "reference_text": "主人说：你好",
         "speed": 1.0,
         "voice": "中文女",
         "version": "v1"
@@ -1161,7 +1161,7 @@
     "model": "openai",
     "img_save_path": "./out/图像识别",
     "prompt": "请讲解一下图片里的内容",
-    "screenshot_window_title": "微信",
+    "screenshot_window_title": "None",
     "screenshot_delay": 3.0,
     "loop_screenshot_enable": false,
     "loop_screenshot_delay": 15,
@@ -1926,7 +1926,7 @@
     }
   },
   "webui": {
-    "ip": "192.168.3.193",
+    "ip": "192.168.2.89",
     "port": 8081,
     "title": "AI Vtuber",
     "auto_run": false,
