@@ -4299,12 +4299,12 @@ class My_handle(metaclass=SingletonMeta):
                 
                 logger.info(f"收到LLM回调消息，内容: {content}")
                 
-                # 对LLM回复内容应用动作映射
-                if self.config.get("action_mapping", "enable") and content:
-                    logger.info(f"对LLM回调内容应用动作映射: {content}")
-                    action_result = self.action_mapping_handle(content)
-                    if action_result:
-                        logger.info(f"LLM回调消息动作映射结果: {action_result}")
+                # # 对LLM回复内容应用动作映射
+                # if self.config.get("action_mapping", "enable") and content:
+                #     logger.info(f"对LLM回调内容应用动作映射: {content}")
+                #     action_result = self.action_mapping_handle(content)
+                #     if action_result:
+                #         logger.info(f"LLM回调消息动作映射结果: {action_result}")
             
             return True
         except Exception as e:

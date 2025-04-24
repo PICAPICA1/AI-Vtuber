@@ -1320,7 +1320,7 @@ class Audio:
                 # 将音频路径转换为音频url，如E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
                 # 其中127.0.0.1:8081 是webui的ip和端口，从config中读取，如果ip为0.0.0.0，则表示为使用上网卡的ip做为url的ip
                 audio_url = self.convert_path_to_url(voice_tmp_path)
-                self.action_mapping_handle(message["content"], audio_url)
+                self.action_mapping_handle(message["content"], audio_url, voice_tmp_path)
 
             # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
             if self.config.get("play_audio", "enable"):
@@ -2002,7 +2002,7 @@ class Audio:
             voice_tmp_path = await self.my_tts.edge_tts_api(data)
 
         elif audio_synthesis_type == "elevenlabs":
-            return
+            return None
         
             try:
                 # 如果配置了密钥就设置上0.0
@@ -2404,13 +2404,14 @@ class Audio:
 
 
     # 动作映射处理
-    def action_mapping_handle(self, llm_content: str, audio_url: str):
+    def action_mapping_handle(self, llm_content: str, audio_url: str, audio_path: str):
         """
         根据LLM生成内容匹配并判定对应的动作
         
         参数:
             llm_content: LLM生成的内容文本
             audio_url: 音频文件url
+            audio_path: 音频文件路径
             
         返回:
             dict: 包含匹配结果的字典，格式如下:
@@ -2420,11 +2421,69 @@ class Audio:
                     "match_word": 匹配到的关键词,
                     "priority": 匹配优先级,
                     "timestamp": 匹配时间戳,
-                    "id": 动作ID
+                    "id": 动作ID,
+                    "duration": 音频时长（秒）
                 }
                 如果没有匹配到任何动作，则返回None
         """
         try:
+            # 获取音频时长
+            audio_duration = 0
+            if audio_path and os.path.exists(audio_path):
+                try:
+                    # 尝试使用ffmpeg获取音频时长（通过ffprobe）
+                    import subprocess
+                    import json
+                    
+                    result = subprocess.run([
+                        "ffprobe", 
+                        "-v", "error", 
+                        "-show_entries", "format=duration", 
+                        "-of", "json", 
+                        audio_path
+                    ], capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        data = json.loads(result.stdout)
+                        audio_duration = float(data['format']['duration'])
+                        logger.info(f"使用ffprobe获取到音频文件时长: {audio_duration}秒")
+                except Exception as e:
+                    logger.error(f"使用ffprobe获取音频时长失败: {e}")
+                    try:
+                        # 尝试使用librosa获取音频时长（跨平台但较慢）
+                        import librosa
+                        y, sr = librosa.load(audio_path, sr=None)
+                        audio_duration = librosa.get_duration(y=y, sr=sr)
+                        logger.info(f"使用librosa获取到音频文件时长: {audio_duration}秒")
+                    except Exception as e2:
+                        logger.error(f"使用librosa获取音频时长失败: {e2}")
+                        try:
+                            # 尝试使用pygame获取音频时长
+                            import pygame
+                            pygame.mixer.init()
+                            sound = pygame.mixer.Sound(audio_path)
+                            audio_duration = sound.get_length()
+                            logger.info(f"使用pygame获取到音频文件时长: {audio_duration}秒")
+                            # 释放资源
+                            del sound
+                            pygame.mixer.quit()
+                        except Exception as e3:
+                            logger.error(f"使用pygame获取音频时长失败: {e3}")
+                            try:
+                                # 尝试使用wave模块（仅支持wav格式）
+                                if audio_path.lower().endswith('.wav'):
+                                    import wave
+                                    with wave.open(audio_path, 'rb') as wf:
+                                        # 获取帧率和帧数
+                                        frames = wf.getnframes()
+                                        rate = wf.getframerate()
+                                        audio_duration = frames / float(rate)
+                                        logger.info(f"使用wave模块获取到音频文件时长: {audio_duration}秒")
+                            except Exception as e4:
+                                logger.error(f"所有获取音频时长的方法都失败: {e4}")
+            else:
+                logger.warning(f"音频文件不存在或路径无效: {audio_path}")
+            
             if not llm_content:
                 return None
                 
@@ -2471,7 +2530,8 @@ class Audio:
                                     "match_word": action_name,
                                     "priority": priority,
                                     "audio_url": audio_url,
-                                    "content": llm_content
+                                    "content": llm_content,
+                                    "duration": audio_duration
                                 }
                                 
                                 # 添加时间戳并存入队列
@@ -2519,7 +2579,8 @@ class Audio:
                                     "match_word": word,
                                     "priority": priority,
                                     "audio_url": audio_url,
-                                    "content": llm_content
+                                    "content": llm_content,
+                                    "duration": audio_duration
                                 })
                         else:
                             if word in llm_content:
@@ -2530,7 +2591,8 @@ class Audio:
                                     "match_word": word,
                                     "priority": priority,
                                     "audio_url": audio_url,
-                                    "content": llm_content
+                                    "content": llm_content,
+                                    "duration": audio_duration
                                 })
             
             # 匹配结果
@@ -2580,7 +2642,8 @@ class Audio:
                             "match_word": "强制匹配",
                             "priority": selected_action.get("priority", 0),
                             "audio_url": audio_url,
-                            "content": llm_content
+                            "content": llm_content,
+                            "duration": audio_duration
                         }
                         logger.info(f"连续三次未匹配，强制匹配动作组1: {matched_result['action_name']}")
             else:
