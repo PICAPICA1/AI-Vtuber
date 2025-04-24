@@ -5,7 +5,7 @@
     "password": "123456",
     "ums_api": "http://127.0.0.1:1119"
   },
-  "api_ip": "192.168.3.186",
+  "api_ip": "192.168.3.193",
   "api_port": 8082,
   "platform": "bilibili2",
   "room_display_id": "278333",
@@ -1926,7 +1926,7 @@
     }
   },
   "webui": {
-    "ip": "192.168.3.186",
+    "ip": "192.168.3.193",
     "port": 8081,
     "title": "AI Vtuber",
     "auto_run": false,
