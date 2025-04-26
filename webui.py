@@ -6611,6 +6611,55 @@ def goto_func_page():
                             }
                         )
                         input_unity_password = ui.input(label='密码', value=config.get("unity", "password"), placeholder='对接Unity应用使用的HTTP中转站的密码')
+                    
+                    # 添加Unity操控区域
+                    with ui.row():
+                        unity_control_type = ui.select(
+                            label='操控类型',
+                            options={"scene": "场景切换", "camera": "机位切换", "action": "动作执行"},
+                            value="scene"
+                        )
+                        unity_control_value = ui.input(label='操控值', placeholder='输入场景名称/机位名称/动作名称')
+                        
+                        async def send_unity_control():
+                            if not unity_control_value.value:
+                                ui.notify('请输入操控值', type='negative')
+                                return
+                                
+                            control_type = unity_control_type.value
+                            control_value = unity_control_value.value
+                            
+                            try:
+                                api_base_url = f"http://{config.get('api_ip')}:{config.get('api_port')}"
+                                
+                                # 根据控制类型调用相应的API
+                                if control_type == "scene":
+                                    url = f"{api_base_url}/add_scene_change?scene_name={control_value}"
+                                    await common.send_async_request(
+                                        url=url,
+                                        method="POST"
+                                    )
+                                    ui.notify(f'场景切换命令已发送: {control_value}', type='positive')
+                                elif control_type == "camera":
+                                    url = f"{api_base_url}/add_camera_change?camera_name={control_value}"
+                                    await common.send_async_request(
+                                        url=url,
+                                        method="POST"
+                                    )
+                                    ui.notify(f'机位切换命令已发送: {control_value}', type='positive')
+                                elif control_type == "action":
+                                    # 对于动作执行，需要action_name和action_id两个参数
+                                    # 这里假设control_value是动作名称，为动作ID使用默认值1
+                                    url = f"{api_base_url}/add_action_mapping?action_name={control_value}&action_id=1"
+                                    await common.send_async_request(
+                                        url=url,
+                                        method="POST"
+                                    )
+                                    ui.notify(f'动作执行命令已发送: {control_value}', type='positive')
+                            except Exception as e:
+                                ui.notify(f'发送失败: {str(e)}', type='negative')
+                        
+                        ui.button('发送', on_click=send_unity_control).props('color=primary')
 
 
         with ui.tab_panel(copywriting_page).style(tab_panel_css):
@@ -6711,7 +6760,7 @@ def goto_func_page():
             with ui.row().style("position:fixed; top: 100px; right: 20px;"):
                 with ui.expansion('聊天记录', icon="question_answer", value=True):
                     scroll_area_chat_box = ui.scroll_area().style("width:500px; height:700px;")
-                
+
 
             with ui.row():
                 switch_talk_key_listener_enable = ui.switch('启用按键监听', value=config.get("talk", "key_listener_enable")).style(switch_internal_css).tooltip("启用后，可以通过键盘单击下放配置的录音按键，启动语音识别对话功能")

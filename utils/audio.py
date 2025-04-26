@@ -45,11 +45,6 @@ class Audio:
     # 第一次触发voice_tmp_path_queue_not_empty标志
     voice_tmp_path_queue_not_empty_flag = False
 
-    # 动作映射结果缓存队列
-    action_mapping_queue = []
-    # 动作映射结果缓存大小上限
-    action_mapping_queue_max_size = 100
-    # 连续未匹配动作计数
     no_match_count = 0
 
     # 异常报警数据
@@ -1328,8 +1323,14 @@ class Audio:
 
             return True
 
+        # 先对message["content"]进行正则匹配「」中提取的内容是要合成的文本,[]中提取的内容是要合成的动作
+        pattern = r"「(.*?)」"
+        matches = re.findall(pattern, message["content"])
 
-        resp_json = await self.tts_handle(message)
+        # 假设只关心第一个匹配到的内容作为要合成的文本
+        if not matches or len(matches) == 0:
+            return False
+        resp_json = await self.tts_handle(matches[0])
         if resp_json["result"]["code"] == 200:
             voice_tmp_path = resp_json["result"]["audio_path"]
         else:
@@ -2402,7 +2403,6 @@ class Audio:
 
         return True
 
-
     # 动作映射处理
     def action_mapping_handle(self, llm_content: str, audio_url: str, audio_path: str):
         """
@@ -2503,12 +2503,12 @@ class Audio:
             # 初始化变量
             matched_actions = []  # 存储所有匹配结果
             
-            # 先检查是否有「」包围的动作名称
+            # 先检查是否有[]包围的动作名称
             import re
-            name_matches = re.findall(r'「(.+?)」', llm_content)
-            logger.info(f"从「」中提取的可能动作名称: {name_matches}")
+            name_matches = re.findall(r'[(.+?)]', llm_content)
+            logger.info(f"从[]中提取的可能动作名称: {name_matches}")
             
-            # 如果找到「」中的内容，尝试匹配动作名称
+            # 如果找到[]中的内容，尝试匹配动作名称
             if name_matches:
                 for name_match in name_matches:
                     # 遍历所有动作组查找匹配
@@ -2522,7 +2522,7 @@ class Audio:
                             
                             # 检查是否精确匹配动作名称
                             if action_name and action_name == name_match:
-                                logger.info(f"在「」中找到精确匹配动作名称: {action_name}")
+                                logger.info(f"在[]中找到精确匹配动作名称: {action_name}")
                                 # 找到精确匹配，直接返回结果
                                 matched_result = {
                                     "action_name": action_name,
@@ -2535,25 +2535,28 @@ class Audio:
                                 }
                                 
                                 # 添加时间戳并存入队列
-                                import time
-                                matched_result["timestamp"] = int(time.time())
-                                matched_result["id"] = len(Audio.action_mapping_queue) + 1
+                                # 原始代码
+                                # import time
+                                # matched_result["timestamp"] = int(time.time())
+                                # matched_result["id"] = len(Audio.action_mapping_queue) + 1
                                 
                                 # 添加到队列中
-                                Audio.action_mapping_queue.append(matched_result)
+                                # Audio.action_mapping_queue.append(matched_result)
                                 
                                 # 如果队列超出最大长度，删除最早的记录
-                                if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
-                                    Audio.action_mapping_queue.pop(0)
+                                # if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
+                                #     Audio.action_mapping_queue.pop(0)
                                 
                                 # 重置未匹配计数
                                 Audio.no_match_count = 0
-                                
-                                logger.info(f"最终动作映射结果(从「」中精确匹配): {matched_result}")
+
+                                # 使用UnityQueueHandler添加动作映射
+                                from main import unity_queue_handler
+                                unity_queue_handler.add_action_mapping(matched_result)
                                 return matched_result
             
-            # 如果没有在「」中找到匹配的动作名称，则尝试从全文匹配关键词
-            logger.info("在「」中未找到精确匹配，尝试匹配关键词")
+            # 如果没有在[]中找到匹配的动作名称，则尝试从全文匹配关键词
+            logger.info("在[]中未找到精确匹配，尝试匹配关键词")
             
             # 遍历所有动作组
             for group in action_groups:
@@ -2652,16 +2655,21 @@ class Audio:
             
             # 如果有匹配结果，添加时间戳并存入队列
             if matched_result:
-                import time
-                matched_result["timestamp"] = int(time.time())
-                matched_result["id"] = len(Audio.action_mapping_queue) + 1
+                # 原始代码
+                # import time
+                # matched_result["timestamp"] = int(time.time())
+                # matched_result["id"] = len(Audio.action_mapping_queue) + 1
                 
                 # 添加到队列中
-                Audio.action_mapping_queue.append(matched_result)
+                # Audio.action_mapping_queue.append(matched_result)
                 
                 # 如果队列超出最大长度，删除最早的记录
-                if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
-                    Audio.action_mapping_queue.pop(0)
+                # if len(Audio.action_mapping_queue) > Audio.action_mapping_queue_max_size:
+                #     Audio.action_mapping_queue.pop(0)
+                
+                # 使用UnityQueueHandler添加动作映射
+                from main import unity_queue_handler
+                unity_queue_handler.add_action_mapping(matched_result)
                 
                 logger.info(f"最终动作映射结果: {matched_result}")
             else:
@@ -2674,10 +2682,11 @@ class Audio:
             logger.error(traceback.format_exc())
             return None
 
-    # 获取动作映射队列
+    # 获取动作映射队列 - 这个方法应该被删除或重定向到UnityQueueHandler
     def get_action_mapping_queue(self, limit=None):
         """
         获取动作映射结果缓存队列
+        这个方法现在是重定向到全局的UnityQueueHandler
         
         Args:
             limit: 返回的记录数量限制，None表示返回全部
@@ -2686,21 +2695,17 @@ class Audio:
             dict: 包含动作映射记录的字典
         """
         try:
-            if limit is not None and isinstance(limit, int) and limit > 0:
-                result_data = Audio.action_mapping_queue[-limit:]
-            else:
-                result_data = Audio.action_mapping_queue.copy()
-                
-            # 确保返回一个字典，而不是列表
-            return {"data": result_data, "count": len(result_data)}
+            from main import unity_queue_handler
+            return unity_queue_handler.get_action_mapping_queue(limit)
         except Exception as e:
             logger.error(f"获取动作映射队列出错: {e}")
             return {"data": [], "count": 0}
     
-    # 删除动作映射队列中的记录
+    # 删除动作映射队列中的记录 - 这个方法应该被删除或重定向到UnityQueueHandler
     def delete_action_mapping(self, action_id=None, delete_all=False):
         """
         删除动作映射队列中的记录
+        这个方法现在是重定向到全局的UnityQueueHandler
         
         参数:
             action_id: 要删除的动作ID，None表示不按ID删除
@@ -2710,22 +2715,8 @@ class Audio:
             bool: 是否删除成功
         """
         try:
-            if not Audio.action_mapping_queue:
-                return False
-            
-            # 删除所有记录
-            if delete_all:
-                Audio.action_mapping_queue = []
-                return True
-            
-            # 删除指定ID的记录
-            if action_id is not None:
-                for i, item in enumerate(Audio.action_mapping_queue):
-                    if item.get("id") == action_id:
-                        Audio.action_mapping_queue.pop(i)
-                        return True
-            
-            return False
+            from main import unity_queue_handler
+            return unity_queue_handler.delete_action_mapping(action_id, delete_all)
         except Exception as e:
             logger.error(f"删除动作映射记录出错: {e}")
             logger.error(traceback.format_exc())
@@ -2775,3 +2766,4 @@ class Audio:
             logger.error(f"转换文件路径为URL时出错: {e}")
             logger.error(traceback.format_exc())
             return ""
+

@@ -6,6 +6,8 @@ import asyncio, aiohttp
 import traceback
 import copy
 import json, re
+import time
+import queue
 
 from functools import partial
 
@@ -19,7 +21,6 @@ import numpy as np
 import speech_recognition as sr
 from aip import AipSpeech
 import signal
-import time
 
 import http.server
 import socketserver
@@ -29,6 +30,7 @@ from utils.common import Common
 from utils.config import Config
 from utils.my_handle import My_handle
 import utils.my_global as my_global
+from utils.unity_queue_handler import unity_queue_handler
 
 """
 	___ _                       
@@ -106,6 +108,9 @@ def start_server():
     is_recording = False
     # 聊天是否唤醒
     is_talk_awake = False
+
+    # 场景和机位切换处理类
+    # unity_queue_handler = UnityQueueHandler(max_size=100)
 
     # 待播放音频数量（在使用 音频播放器 或者 metahuman-stream等不通过AI Vtuber播放音频的对接项目时，使用此变量记录是是否还有音频没有播放完）
     my_global.wait_play_audio_num = 0
@@ -321,10 +326,7 @@ def start_server():
                     limit: 返回的记录数量限制，None表示返回全部
                 """
                 try:
-                    data = my_handle.get_action_mapping_queue(limit)
-                    # 确保data是一个字典
-                    if not isinstance(data, dict):
-                        data = {"data": data if data is not None else [], "count": len(data) if data is not None else 0}
+                    data = unity_queue_handler.get_action_mapping_queue(limit)
                     return CommonResult(code=200, data=data, message="获取动作映射记录成功！")
                 except Exception as e:
                     logger.error(f"获取动作映射记录失败！{e}")
@@ -341,7 +343,7 @@ def start_server():
                     delete_all: 是否删除所有记录
                 """
                 try:
-                    result = my_handle.delete_action_mapping(action_id, delete_all)
+                    result = unity_queue_handler.delete_action_mapping(action_id, delete_all)
                     if result:
                         return CommonResult(code=200, message="删除动作映射记录成功！")
                     else:
@@ -349,6 +351,97 @@ def start_server():
                 except Exception as e:
                     logger.error(f"删除动作映射记录失败！{e}")
                     return CommonResult(code=-1, message=f"删除动作映射记录失败！{e}")
+
+            # 添加动作映射记录接口
+            @app.post("/add_action_mapping")
+            async def add_action_mapping(action_name: str, action_id: int):
+                """
+                添加动作映射记录
+                
+                参数:
+                    action_name: 动作名称
+                    action_id: 动作ID
+                """
+                try:
+                    action_data = {
+                        "action_name": action_name,
+                        "action_group": action_id
+                    }
+                    unity_queue_handler.add_action_mapping(action_data)
+                    return CommonResult(code=200, message="添加动作映射记录成功！")
+                except Exception as e:
+                    logger.error(f"添加动作映射记录失败！{e}")
+                    return CommonResult(code=-1, message=f"添加动作映射记录失败！{e}")
+
+            # 添加场景切换记录接口
+            @app.post("/add_scene_change")
+            async def add_scene_change(scene_name: str):
+                """
+                添加场景切换记录
+                
+                参数:
+                    scene_name: 场景名称
+                """
+                try:
+                    unity_queue_handler.add_scene_change(scene_name)
+                    return CommonResult(code=200, message="添加场景切换记录成功！")
+                except Exception as e:
+                    logger.error(f"添加场景切换记录失败！{e}")
+                    return CommonResult(code=-1, message=f"添加场景切换记录失败！{e}")
+            
+            # 添加机位切换记录接口
+            @app.post("/add_camera_change")
+            async def add_camera_change(camera_name: str):
+                """
+                添加机位切换记录
+                
+                参数:
+                    camera_name: 机位名称
+                """
+                try:
+                    unity_queue_handler.add_camera_change(camera_name)
+                    return CommonResult(code=200, message="添加机位切换记录成功！")
+                except Exception as e:
+                    logger.error(f"添加机位切换记录失败！{e}")
+                    return CommonResult(code=-1, message=f"添加机位切换记录失败！{e}")
+            
+            # 获取场景/机位切换记录接口
+            @app.get("/get_scene_camera_changes")
+            async def get_scene_camera_changes(change_type: str = None, limit: int = None):
+                """
+                获取场景/机位切换记录
+                
+                参数:
+                    change_type: 变更类型，可选 'scene'(场景)、'camera'(机位)或None(全部)
+                    limit: 返回的记录数量限制，None表示返回全部
+                """
+                try:
+                    data = unity_queue_handler.get_scene_camera_changes(change_type, limit)
+                    return CommonResult(code=200, data=data, message="获取场景/机位切换记录成功！")
+                except Exception as e:
+                    logger.error(f"获取场景/机位切换记录失败！{e}")
+                    return CommonResult(code=-1, message=f"获取场景/机位切换记录失败！{e}", data={})
+            
+            # 删除场景/机位切换记录接口
+            @app.post("/delete_scene_camera_change")
+            async def delete_scene_camera_change(change_id: int = None, change_type: str = None, delete_all: bool = False):
+                """
+                删除场景/机位切换记录
+                
+                参数:
+                    change_id: 要删除的记录ID，None表示不按ID删除
+                    change_type: 变更类型，可选 'scene'(场景)、'camera'(机位)或None(全部)
+                    delete_all: 是否删除所有记录
+                """
+                try:
+                    result = unity_queue_handler.delete_scene_camera_change(change_id, change_type, delete_all)
+                    if result:
+                        return CommonResult(code=200, message="删除场景/机位切换记录成功！")
+                    else:
+                        return CommonResult(code=400, message="删除场景/机位切换记录失败，没有找到相关记录！")
+                except Exception as e:
+                    logger.error(f"删除场景/机位切换记录失败！{e}")
+                    return CommonResult(code=-1, message=f"删除场景/机位切换记录失败！{e}")
 
             logger.info("HTTP API线程已启动！")
 

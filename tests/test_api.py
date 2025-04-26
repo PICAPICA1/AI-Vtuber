@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # 导入StaticFiles用于挂载静态目录
 import uvicorn
 import json
 import random
@@ -8,9 +9,6 @@ import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import os
-
-# 新增模块：用于读取音频时长
-from pydub import AudioSegment
 
 # 创建FastAPI应用
 app = FastAPI()
@@ -24,6 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 挂载静态文件目录
+# 确保out目录存在
+os.makedirs("./out", exist_ok=True)
+# 将out目录挂载为/audio路径
+app.mount("/out", StaticFiles(directory="./out"), name="out")
+
 # 全局变量，用于存储生成的假数据
 action_mapping_queue = []
 
@@ -31,38 +35,12 @@ action_mapping_queue = []
 counter = 0
 
 # 音频文件夹路径
-audio_folders = ["./out/", "./voices/"]
+audio_folders = ["./out/"]
 
-# 读取音频时长的函数
+# 使用假的音频时长计算函数替代 AudioSegment
 def get_audio_duration(audio_path):
-    try:
-        if not os.path.exists(audio_path):
-            # 尝试在预设的文件夹中查找
-            for folder in audio_folders:
-                potential_path = os.path.join(folder, os.path.basename(audio_path))
-                if os.path.exists(potential_path):
-                    audio_path = potential_path
-                    break
-            else:
-                return 0  # 如果找不到文件，返回0
-        
-        # 根据文件扩展名加载音频
-        if audio_path.lower().endswith('.mp3'):
-            audio = AudioSegment.from_mp3(audio_path)
-        elif audio_path.lower().endswith('.wav'):
-            audio = AudioSegment.from_wav(audio_path)
-        elif audio_path.lower().endswith('.ogg'):
-            audio = AudioSegment.from_ogg(audio_path)
-        else:
-            # 尝试自动检测格式
-            audio = AudioSegment.from_file(audio_path)
-        
-        # 获取时长（毫秒），并转换为秒
-        duration_seconds = len(audio) / 1000.0
-        return round(duration_seconds, 2)
-    except Exception as e:
-        print(f"读取音频时长失败: {e}")
-        return 0
+    # 仅返回随机时长，不再依赖 AudioSegment
+    return round(random.uniform(2.0, 15.0), 2)
 
 # 从config.json文件中加载动作映射数据
 def load_action_mapping_data():
@@ -72,19 +50,55 @@ def load_action_mapping_data():
             return config_data.get("action_mapping", {})
     except Exception as e:
         print(f"加载config.json文件失败: {e}")
-        return {}
+        # 返回假数据，确保功能正常运行
+        return {
+            "groups": [
+                {
+                    "id": 1,
+                    "description": "默认分组",
+                    "actions": [
+                        {
+                            "name": "微笑",
+                            "match_words": ["开心", "高兴", "微笑"],
+                            "priority": 1
+                        },
+                        {
+                            "name": "招手",
+                            "match_words": ["你好", "欢迎", "招手"],
+                            "priority": 2
+                        }
+                    ]
+                }
+            ]
+        }
 
 # 加载动作映射数据
 action_mapping_data = load_action_mapping_data()
 
 # 生成一条假的动作记录
 def generate_fake_action_record():
+    print("生成假的动作记录")
     global counter
     counter += 1
     
     # 随机选择一个动作组
     if not action_mapping_data or "groups" not in action_mapping_data:
-        return None
+        # 如果无法读取配置，生成一个默认动作
+        record = {
+            "id": counter,
+            "action_name": "默认动作",
+            "match_word": "默认关键词",
+            "priority": 0,
+            "group_id": 0,
+            "group_description": "默认分组",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "is_executed": random.choice([True, False]),
+            "content": "这是一条默认生成的消息内容",
+            "audio_path": "./out/1.wav",
+            "audio_url": "http://127.0.0.1:8000/out/1.wav",
+            "audio_duration": get_audio_duration("./out/1.wav")
+        }
+        return record
     
     group = random.choice(action_mapping_data.get("groups", []))
     if not group or "actions" not in group:
@@ -112,16 +126,15 @@ def generate_fake_action_record():
     content = random.choice(contents)
     
     # 生成随机音频路径
-    audio_extensions = [".mp3", ".wav", ".ogg"]
+    audio_extensions = [".wav"]
     audio_filenames = [
-        "voice_1", "voice_2", "voice_3", "voice_4", "voice_5",
-        "record", "output", "response", "answer"
+        "1", "2", "3", "4", "5"
     ]
     audio_filename = random.choice(audio_filenames) + random.choice(audio_extensions)
     audio_path = os.path.join("./out", audio_filename)
     
-    # 生成随机音频URL
-    audio_url = f"http://localhost:8000/audio/{audio_filename}"
+    # 生成音频URL - 现在直接使用挂载的静态目录
+    audio_url = f"/out/{audio_filename}"
     
     # 获取音频时长
     audio_duration = get_audio_duration(audio_path)
@@ -138,7 +151,7 @@ def generate_fake_action_record():
         "is_executed": random.choice([True, False]),
         "content": content,
         "audio_path": audio_path,
-        "audio_url": audio_url,
+        "audio_url": f"http://127.0.0.1:8000{audio_url}",
         "audio_duration": audio_duration
     }
     
@@ -226,9 +239,38 @@ async def delete_action_mapping(action_id: Optional[int] = None, delete_all: Opt
         print(f"删除动作映射记录失败！{e}")
         return CommonResult(code=-1, message=f"删除动作映射记录失败！{e}").dict()
 
+# API路由定义 - 获取可用的音频文件列表
+@app.get("/list_audio_files")
+async def list_audio_files():
+    """
+    获取out目录中可用的音频文件列表
+    """
+    try:
+        audio_files = []
+        for filename in os.listdir("./out"):
+            if filename.endswith(('.wav', '.mp3', '.ogg')):
+                file_path = os.path.join("./out", filename)
+                duration = get_audio_duration(file_path)
+                audio_files.append({
+                    "filename": filename,
+                    "url": f"/out/{filename}",
+                    "full_path": file_path,
+                    "duration": duration
+                })
+        
+        return CommonResult(
+            code=200, 
+            message="获取音频文件列表成功", 
+            data={"files": audio_files, "count": len(audio_files)}
+        ).dict()
+    except Exception as e:
+        print(f"获取音频文件列表失败：{e}")
+        return CommonResult(code=-1, message=f"获取音频文件列表失败：{e}").dict()
+
 # 启动定时生成假数据的线程
 threading.Thread(target=generate_fake_data_periodically, daemon=True).start()
 
 if __name__ == "__main__":
     # 启动FastAPI应用
+    # 可以添加host参数以便于在局域网中访问
     uvicorn.run(app, host="0.0.0.0", port=8000) 
