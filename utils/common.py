@@ -1676,20 +1676,23 @@ class Common:
         """
         try:
             import cv2
+            import traceback
 
             available_cameras = []
             for i in range(max_tested):
-                cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)  # 尝试打开摄像头
+                cap = cv2.VideoCapture(i, cv2.CAP_AVFOUNDATION)  # 尝试打开摄像头
                 if cap.isOpened():  # 检查摄像头是否成功打开
                     available_cameras.append(i)
                     cap.release()  # 释放摄像头
                 else:
                     break  # 如果一个摄像头索引打不开，假设后面的都不可用
-            return available_cameras
-        except Exception as e:
-            logger.error(traceback.format_exc())
 
-        return []
+            logger.warning(available_cameras)
+            return available_cameras
+
+        except Exception as e:
+            logger.error(traceback.format_exc())  # 打印完整堆栈信息 /Users/hteno/miniconda3/envs/aivtb/bin/python
+            return []
 
 
     def capture_image(self, img_save_path="./out/图像识别", camera_index=0):
