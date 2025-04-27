@@ -1,9 +1,37 @@
 import cv2
+import platform
+
+def detect_os():
+    """
+    识别操作系统
+    """
+    system = platform.system()
+    if system == 'Linux':
+        return 'Linux'
+    elif system == 'Windows':
+        return 'Windows'
+    elif system == 'Darwin':
+        return 'MacOS'
+    
+    return '未知系统'
 
 def list_cameras(max_tested=10):
+    # 根据操作系统选择适当的摄像头后端
+    os_type = detect_os()
+    backend = None
+    if os_type == 'Windows':
+        backend = cv2.CAP_DSHOW
+    elif os_type == 'MacOS':
+        backend = cv2.CAP_AVFOUNDATION
+    # Linux不需要特殊指定后端，可以使用默认值
+    
     available_cameras = []
     for i in range(max_tested):
-        cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)  # 尝试打开摄像头
+        if backend is not None:
+            cap = cv2.VideoCapture(i, backend)  # 使用特定后端打开摄像头
+        else:
+            cap = cv2.VideoCapture(i)  # Linux平台使用默认后端
+        
         if cap.isOpened():  # 检查摄像头是否成功打开
             available_cameras.append(i)
             cap.release()  # 释放摄像头
@@ -12,7 +40,20 @@ def list_cameras(max_tested=10):
     return available_cameras
 
 def capture_image(camera_index=0):
-    cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+    # 根据操作系统选择适当的摄像头后端
+    os_type = detect_os()
+    backend = None
+    if os_type == 'Windows':
+        backend = cv2.CAP_DSHOW
+    elif os_type == 'MacOS':
+        backend = cv2.CAP_AVFOUNDATION
+    # Linux不需要特殊指定后端，可以使用默认值
+    
+    # 使用适当的后端打开摄像头
+    if backend is not None:
+        cap = cv2.VideoCapture(camera_index, backend)
+    else:
+        cap = cv2.VideoCapture(camera_index)  # Linux平台使用默认后端
     
     if not cap.isOpened():
         print(f"Cannot open camera {camera_index}")
