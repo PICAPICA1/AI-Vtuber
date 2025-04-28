@@ -946,7 +946,7 @@ class My_handle(metaclass=SingletonMeta):
         username = My_handle.common.merge_consecutive_asterisks(username)
 
         # 最大保留的用户名长度
-        username = username[:self.config.get("local_qa", "text", "username_max_len")]
+        username = username[:My_handle.config.get("local_qa", "text", "username_max_len")]
 
         # 1、匹配本地问答库 触发后不执行后面的其他功能
         if My_handle.config.get("local_qa", "text", "enable"):
@@ -980,12 +980,12 @@ class My_handle(metaclass=SingletonMeta):
                     # 根据模板变量关系进行回复内容的替换
                     # 假设有多个未知变量，用户可以在此处定义动态变量
                     variables = {
-                        'username': data["username"][:self.config.get("reply_template", "username_max_len")],
+                        'username': data["username"][:My_handle.config.get("reply_template", "username_max_len")],
                         'data': tmp,
                         'cur_time': My_handle.common.get_bj_time(5),
                     }
 
-                    reply_template_copywriting = My_handle.common.get_list_random_or_default(self.config.get("reply_template", "copywriting"), "{data}")
+                    reply_template_copywriting = My_handle.common.get_list_random_or_default(My_handle.config.get("reply_template", "copywriting"), "{data}")
                     # 使用字典进行字符串替换
                     if any(var in reply_template_copywriting for var in variables):
                         tmp = reply_template_copywriting.format(**{var: value for var, value in variables.items() if var in reply_template_copywriting})
@@ -1635,12 +1635,12 @@ class My_handle(metaclass=SingletonMeta):
                 # 根据模板变量关系进行回复内容的替换
                 # 假设有多个未知变量，用户可以在此处定义动态变量
                 variables = {
-                    'username': data["username"][:self.config.get("reply_template", "username_max_len")],
+                    'username': data["username"][:My_handle.config.get("reply_template", "username_max_len")],
                     'data': resp_content,
                     'cur_time': My_handle.common.get_bj_time(5),
                 }
 
-                reply_template_copywriting = My_handle.common.get_list_random_or_default(self.config.get("reply_template", "copywriting"), "{data}")
+                reply_template_copywriting = My_handle.common.get_list_random_or_default(My_handle.config.get("reply_template", "copywriting"), "{data}")
                 # 使用字典进行字符串替换
                 if any(var in reply_template_copywriting for var in variables):
                     resp_content = reply_template_copywriting.format(**{var: value for var, value in variables.items() if var in reply_template_copywriting})
@@ -1743,12 +1743,12 @@ class My_handle(metaclass=SingletonMeta):
                     # 根据模板变量关系进行回复内容的替换
                     # 假设有多个未知变量，用户可以在此处定义动态变量
                     variables = {
-                        'username': data["username"][:self.config.get("reply_template", "username_max_len")],
+                        'username': data["username"][:My_handle.config.get("reply_template", "username_max_len")],
                         'data': "",
                         'cur_time': My_handle.common.get_bj_time(5),
                     }
 
-                    reply_template_copywriting = My_handle.common.get_list_random_or_default(self.config.get("reply_template", "copywriting"), "")
+                    reply_template_copywriting = My_handle.common.get_list_random_or_default(My_handle.config.get("reply_template", "copywriting"), "")
                     # 使用字典进行字符串替换
                     if any(var in reply_template_copywriting for var in variables):
                         tmp = reply_template_copywriting.format(**{var: value for var, value in variables.items() if var in reply_template_copywriting})
@@ -3131,15 +3131,15 @@ class My_handle(metaclass=SingletonMeta):
                     if My_handle.config.get("read_comment", "read_username_enable"):
                         # 将用户名中特殊字符替换为空
                         message['username'] = My_handle.common.replace_special_characters(message['username'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")
-                        message['username'] = message['username'][:self.config.get("read_comment", "username_max_len")]
+                        message['username'] = message['username'][:My_handle.config.get("read_comment", "username_max_len")]
 
                         # 将用户名字符串中的数字转换成中文
                         if My_handle.config.get("filter", "username_convert_digits_to_chinese"):
                             message["username"] = My_handle.common.convert_digits_to_chinese(message["username"])
                             logger.debug(f"用户名字符串中的数字转换成中文：{message['username']}")
 
-                        if len(self.config.get("read_comment", "read_username_copywriting")) > 0:
-                            tmp_content = random.choice(self.config.get("read_comment", "read_username_copywriting"))
+                        if len(My_handle.config.get("read_comment", "read_username_copywriting")) > 0:
+                            tmp_content = random.choice(My_handle.config.get("read_comment", "read_username_copywriting"))
                             if "{username}" in tmp_content:
                                 message['content'] = tmp_content.format(username=message['username']) + message['content']
 
@@ -3188,7 +3188,7 @@ class My_handle(metaclass=SingletonMeta):
             if chat_type in self.chat_type_list:
                 data_json["content"] = My_handle.config.get("before_prompt")
                 # 是否启用弹幕模板
-                if self.config.get("comment_template", "enable"):
+                if My_handle.config.get("comment_template", "enable"):
                     # 假设有多个未知变量，用户可以在此处定义动态变量
                     variables = {
                         'username': username,
@@ -3196,7 +3196,7 @@ class My_handle(metaclass=SingletonMeta):
                         'cur_time': My_handle.common.get_bj_time(5),
                     }
 
-                    comment_template_copywriting = self.config.get("comment_template", "copywriting")
+                    comment_template_copywriting = My_handle.config.get("comment_template", "copywriting")
                     # 使用字典进行字符串替换
                     if any(var in comment_template_copywriting for var in variables):
                         content = comment_template_copywriting.format(**{var: value for var, value in variables.items() if var in comment_template_copywriting})
@@ -3204,9 +3204,95 @@ class My_handle(metaclass=SingletonMeta):
                 data_json["content"] += content + My_handle.config.get("after_prompt")
 
                 logger.debug(f"data_json={data_json}")
-                
+
+                # 调用摄像头获取截图后进行VL分析
+                # 根据摄像头索引截图
+                screenshot_path = self.common.capture_image(
+                    My_handle.config.get("image_recognition", "img_save_path"), 
+                    My_handle.config.get("image_recognition", "cam_index")
+                )
+
+                def get_llm_resp(screenshot_path: str, send_to_all: bool=True):
+                    try:
+                        # logger.warning(f"screenshot_path={screenshot_path}")
+
+                        prompt = My_handle.config.get("image_recognition", "prompt")
+                        data = None
+
+                        if My_handle.config.get("image_recognition", "model") == "gemini":
+                            from utils.gpt_model.gemini import Gemini
+
+                            gemini = Gemini(My_handle.config.get("image_recognition", "gemini"))
+
+                            resp_content = gemini.get_resp_with_img(prompt, screenshot_path)
+
+                            data = {
+                                "type": "reread",
+                                "username": My_handle.config.get("talk", "username"),
+                                "content": resp_content,
+                                "insert_index": -1
+                            }
+                        elif My_handle.config.get("image_recognition", "model") == "zhipu":
+                            from utils.gpt_model.zhipu import Zhipu
+
+                            zhipu = Zhipu(My_handle.config.get("image_recognition", "zhipu"))
+
+                            resp_content = zhipu.get_resp_with_img(prompt, screenshot_path)
+
+                            data = {
+                                "type": "reread",
+                                "data": {
+                                    "username": My_handle.config.get("talk", "username"),
+                                    "content": resp_content,
+                                    "insert_index": -1
+                                }
+                            }
+                        elif My_handle.config.get("image_recognition", "model") == "blip":
+                            from utils.gpt_model.blip import Blip
+
+                            blip = Blip(My_handle.config.get("image_recognition", "blip"))
+
+                            resp_content = blip.get_resp_with_img(prompt, screenshot_path)
+
+                            data = {
+                                "type": "reread",
+                                "data": {
+                                    "username": My_handle.config.get("talk", "username"),
+                                    "content": resp_content,
+                                    "insert_index": -1
+                                }
+                            }
+                        elif My_handle.config.get("image_recognition", "model") == "openai":
+                            from utils.gpt_model.chatgpt import Chatgpt
+
+                            openai = Chatgpt(My_handle.config.get("image_recognition", "openai"), My_handle.config.get("image_recognition", "openai"))
+
+                            resp_content = openai.get_resp_with_img(prompt, screenshot_path)
+
+                            data = {
+                                "type": "reread",
+                                "data": {
+                                    "username": My_handle.config.get("talk", "username"),
+                                    "content": resp_content,
+                                    "insert_index": -1
+                                }
+                            }
+
+                        return data
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        return None
+                    
+                data = get_llm_resp(screenshot_path)
+
+                if data is not None:
+                    # vl识别图片后的提示词
+                    vl_ret_content = data["data"]["content"]
+
+                    data_json["content"] = '直播场景描述 ： ' + vl_ret_content + '\n' + data_json["content"]
+                    
                 # 当前选用的LLM类型是否支持stream，并且启用stream
-                if "stream" in self.config.get(chat_type) and self.config.get(chat_type, "stream"):
+                if "stream" in My_handle.config.get(chat_type) and My_handle.config.get(chat_type, "stream"):
                     logger.warning("使用流式推理LLM")
                     resp_content = self.llm_stream_handle_and_audio_synthesis(chat_type, data_json)
                     return resp_content
@@ -3337,7 +3423,7 @@ class My_handle(metaclass=SingletonMeta):
             # 删除用户名中的特殊字符
             data['username'] = My_handle.common.replace_special_characters(data['username'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")  
 
-            data['username'] = data['username'][:self.config.get("thanks", "username_max_len")]
+            data['username'] = data['username'][:My_handle.config.get("thanks", "username_max_len")]
 
             # 将用户名字符串中的数字转换成中文
             if My_handle.config.get("filter", "username_convert_digits_to_chinese"):
@@ -3434,7 +3520,7 @@ class My_handle(metaclass=SingletonMeta):
             # 删除用户名中的特殊字符
             data['username'] = My_handle.common.replace_special_characters(data['username'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")
 
-            data['username'] = data['username'][:self.config.get("thanks", "username_max_len")]
+            data['username'] = data['username'][:My_handle.config.get("thanks", "username_max_len")]
 
             # 将用户名字符串中的数字转换成中文
             if My_handle.config.get("filter", "username_convert_digits_to_chinese"):
@@ -3494,7 +3580,7 @@ class My_handle(metaclass=SingletonMeta):
             # 删除用户名中的特殊字符
             data['username'] = My_handle.common.replace_special_characters(data['username'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")
 
-            data['username'] = data['username'][:self.config.get("thanks", "username_max_len")]
+            data['username'] = data['username'][:My_handle.config.get("thanks", "username_max_len")]
 
             # 违禁处理
             data['username'] = self.prohibitions_handle(data['username'])
@@ -3985,10 +4071,10 @@ class My_handle(metaclass=SingletonMeta):
                     if My_handle.config.get("read_comment", "read_username_enable"):
                         # 将用户名中特殊字符替换为空
                         message['username'] = My_handle.common.replace_special_characters(message['username'], "！!@#￥$%^&*_-+/——=()（）【】}|{:;<>~`\\")
-                        message['username'] = message['username'][:self.config.get("read_comment", "username_max_len")]
+                        message['username'] = message['username'][:My_handle.config.get("read_comment", "username_max_len")]
 
-                        if len(self.config.get("read_comment", "read_username_copywriting")) > 0:
-                            tmp_content = random.choice(self.config.get("read_comment", "read_username_copywriting"))
+                        if len(My_handle.config.get("read_comment", "read_username_copywriting")) > 0:
+                            tmp_content = random.choice(My_handle.config.get("read_comment", "read_username_copywriting"))
                             if "{username}" in tmp_content:
                                 message['content'] = tmp_content.format(username=message['username']) + message['content']
 
@@ -4036,7 +4122,7 @@ class My_handle(metaclass=SingletonMeta):
 
                 data_json["content"] = My_handle.config.get("before_prompt")
                 # 是否启用弹幕模板
-                if self.config.get("comment_template", "enable"):
+                if My_handle.config.get("comment_template", "enable"):
                     # 假设有多个未知变量，用户可以在此处定义动态变量
                     variables = {
                         'username': username,
@@ -4044,7 +4130,7 @@ class My_handle(metaclass=SingletonMeta):
                         'cur_time': My_handle.common.get_bj_time(5),
                     }
 
-                    comment_template_copywriting = self.config.get("comment_template", "copywriting")
+                    comment_template_copywriting = My_handle.config.get("comment_template", "copywriting")
                     # 使用字典进行字符串替换
                     if any(var in comment_template_copywriting for var in variables):
                         content = comment_template_copywriting.format(**{var: value for var, value in variables.items() if var in comment_template_copywriting})
@@ -4054,7 +4140,7 @@ class My_handle(metaclass=SingletonMeta):
                 logger.debug(f"data_json={data_json}")
                 
                 # 当前选用的LLM类型是否支持stream，并且启用stream
-                if "stream" in self.config.get(chat_type) and self.config.get(chat_type, "stream"):
+                if "stream" in My_handle.config.get(chat_type) and My_handle.config.get(chat_type, "stream"):
                     logger.warning("使用流式推理LLM")
                     resp_content = self.llm_stream_handle_and_audio_synthesis(chat_type, data_json)
                     return resp_content
@@ -4300,7 +4386,7 @@ class My_handle(metaclass=SingletonMeta):
                 logger.info(f"收到LLM回调消息，内容: {content}")
                 
                 # # 对LLM回复内容应用动作映射
-                # if self.config.get("action_mapping", "enable") and content:
+                # if My_handle.config.get("action_mapping", "enable") and content:
                 #     logger.info(f"对LLM回调内容应用动作映射: {content}")
                 #     action_result = self.action_mapping_handle(content)
                 #     if action_result:
