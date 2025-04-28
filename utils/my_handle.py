@@ -1600,6 +1600,8 @@ class My_handle(metaclass=SingletonMeta):
                     "reread": lambda: data["content"]
                 }
             elif type == "vision":
+                # logger.warning(f"chat_type={chat_type}, data={data}")
+
                 # 使用 getattr 来动态获取属性
                 if getattr(self, chat_type, None) is None:
                     self.get_vision_model(chat_type, My_handle.config.get("image_recognition", chat_type))
@@ -3212,83 +3214,14 @@ class My_handle(metaclass=SingletonMeta):
                     My_handle.config.get("image_recognition", "cam_index")
                 )
 
-                def get_llm_resp(screenshot_path: str, send_to_all: bool=True):
-                    try:
-                        # logger.warning(f"screenshot_path={screenshot_path}")
+                vl_ret_content = self.llm_handle(chat_type, {
+                    "ori_content": My_handle.config.get("image_recognition", "prompt") + data_json["content"],
+                    "content": My_handle.config.get("image_recognition", "prompt") + data_json["content"],
+                    "img_data": screenshot_path
+                }, type="vision", webui_show=False)
 
-                        prompt = My_handle.config.get("image_recognition", "prompt")
-                        data = None
-
-                        if My_handle.config.get("image_recognition", "model") == "gemini":
-                            from utils.gpt_model.gemini import Gemini
-
-                            gemini = Gemini(My_handle.config.get("image_recognition", "gemini"))
-
-                            resp_content = gemini.get_resp_with_img(prompt, screenshot_path)
-
-                            data = {
-                                "type": "reread",
-                                "username": My_handle.config.get("talk", "username"),
-                                "content": resp_content,
-                                "insert_index": -1
-                            }
-                        elif My_handle.config.get("image_recognition", "model") == "zhipu":
-                            from utils.gpt_model.zhipu import Zhipu
-
-                            zhipu = Zhipu(My_handle.config.get("image_recognition", "zhipu"))
-
-                            resp_content = zhipu.get_resp_with_img(prompt, screenshot_path)
-
-                            data = {
-                                "type": "reread",
-                                "data": {
-                                    "username": My_handle.config.get("talk", "username"),
-                                    "content": resp_content,
-                                    "insert_index": -1
-                                }
-                            }
-                        elif My_handle.config.get("image_recognition", "model") == "blip":
-                            from utils.gpt_model.blip import Blip
-
-                            blip = Blip(My_handle.config.get("image_recognition", "blip"))
-
-                            resp_content = blip.get_resp_with_img(prompt, screenshot_path)
-
-                            data = {
-                                "type": "reread",
-                                "data": {
-                                    "username": My_handle.config.get("talk", "username"),
-                                    "content": resp_content,
-                                    "insert_index": -1
-                                }
-                            }
-                        elif My_handle.config.get("image_recognition", "model") == "openai":
-                            from utils.gpt_model.chatgpt import Chatgpt
-
-                            openai = Chatgpt(My_handle.config.get("image_recognition", "openai"), My_handle.config.get("image_recognition", "openai"))
-
-                            resp_content = openai.get_resp_with_img(prompt, screenshot_path)
-
-                            data = {
-                                "type": "reread",
-                                "data": {
-                                    "username": My_handle.config.get("talk", "username"),
-                                    "content": resp_content,
-                                    "insert_index": -1
-                                }
-                            }
-
-                        return data
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        return None
-                    
-                data = get_llm_resp(screenshot_path)
-
-                if data is not None:
-                    # vl识别图片后的提示词
-                    vl_ret_content = data["data"]["content"]
-
+                if vl_ret_content is not None:
+                    logger.warning(f"vl_ret_content={vl_ret_content}")
                     data_json["content"] = '直播场景描述 ： ' + vl_ret_content + '\n' + data_json["content"]
                     
                 # 当前选用的LLM类型是否支持stream，并且启用stream
@@ -3338,6 +3271,13 @@ class My_handle(metaclass=SingletonMeta):
                 tmp = My_handle.my_translate.trans(resp_content)
                 if tmp:
                     resp_content = tmp
+
+            # 正则 提取「」中的内容
+            # resp_contents = re.findall(r'「(.*?)」', resp_content)
+            # if len(resp_contents) > 0:
+            #     resp_content = resp_contents[0]
+            # else:
+            #     return None
 
             self.write_to_comment_log(resp_content, {"username": username, "content": content})
 

@@ -615,10 +615,12 @@ class Audio:
 
             # 获取线程锁，避免同时操作
             with Audio.message_queue_lock:
+                # logger.warning(f"插入前 message_queue={Audio.message_queue}")
                 # 在计算出的位置插入新数据
                 Audio.message_queue.insert(insert_position, data_json)
                 # 生产者通过notify()通知消费者列表中有新的消息
                 Audio.message_queue_not_empty.notify()
+                # logger.warning(f"插入后 message_queue={Audio.message_queue}")
 
             return {"code": 200, "msg": f"数据已插入到位置 {insert_position}"}
         else:
@@ -1253,7 +1255,7 @@ class Audio:
         Returns:
             bool: 合成情况
         """
-        logger.debug(message)
+        logger.debug(f"合成音频前的原始数据：{message['content']}")
 
         try:
             # 如果是tts类型为none，暂时这类为直接播放音频，所以就丢给路径队列
@@ -1265,7 +1267,7 @@ class Audio:
             return
 
         try:
-            logger.debug(f"合成音频前的原始数据：{message['content']}")
+            logger.warning(f"合成音频前的原始数据：{message['content']}")
             message["content"] = self.common.remove_extra_words(message["content"], message["config"]["max_len"], message["config"]["max_char_len"])
             # logger.info("裁剪后的合成文本:" + text)
 
@@ -1280,7 +1282,7 @@ class Audio:
         
 
         # 判断消息类型，再变声并封装数据发到队列 减少冗余
-        async def voice_change_and_put_to_queue(message, voice_tmp_path):
+        async def voice_change_and_put_to_queue(message, voice_tmp_path, content_copy):
             # 拼接json数据，存入队列
             data_json = {
                 "type": message['type'],
@@ -1315,7 +1317,7 @@ class Audio:
                 # 将音频路径转换为音频url，如E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
                 # 其中127.0.0.1:8081 是webui的ip和端口，从config中读取，如果ip为0.0.0.0，则表示为使用上网卡的ip做为url的ip
                 audio_url = self.convert_path_to_url(voice_tmp_path)
-                self.action_mapping_handle(message["content"], audio_url, voice_tmp_path)
+                self.action_mapping_handle(content_copy, audio_url, voice_tmp_path)
 
             # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
             if self.config.get("play_audio", "enable"):
@@ -1330,7 +1332,9 @@ class Audio:
         # 假设只关心第一个匹配到的内容作为要合成的文本
         if not matches or len(matches) == 0:
             return False
-        resp_json = await self.tts_handle(matches[0])
+        content_copy = copy.copy(message["content"])
+        message["content"] = matches[0]
+        resp_json = await self.tts_handle(message)
         if resp_json["result"]["code"] == 200:
             voice_tmp_path = resp_json["result"]["audio_path"]
         else:
@@ -1343,8 +1347,8 @@ class Audio:
             return False
         
         logger.info(f"[{message['tts_type']}]合成成功，合成内容：【{message['content']}】，音频存储在 {voice_tmp_path}")
-                 
-        await voice_change_and_put_to_queue(message, voice_tmp_path)  
+        
+        await voice_change_and_put_to_queue(message, voice_tmp_path, content_copy)  
 
         return True
 
@@ -2505,7 +2509,7 @@ class Audio:
             
             # 先检查是否有[]包围的动作名称
             import re
-            name_matches = re.findall(r'[(.+?)]', llm_content)
+            name_matches = re.findall(r'\[(.*?)\]', llm_content)
             logger.info(f"从[]中提取的可能动作名称: {name_matches}")
             
             # 如果找到[]中的内容，尝试匹配动作名称
