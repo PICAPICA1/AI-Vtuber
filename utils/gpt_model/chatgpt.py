@@ -25,11 +25,12 @@ class Chatgpt:
 
 
     # chatgpt相关
-    def chat(self, msg, sessionid):
+    def chat(self, msg, sessionid, save_history=False):
         """
         ChatGPT 对话函数
         :param msg: 用户输入的消息
         :param sessionid: 当前会话 ID
+        :param save_history: 是否保存会话历史，默认为False
         :return: ChatGPT 返回的回复内容
         """
         try:
@@ -52,10 +53,11 @@ class Chatgpt:
             if message.__contains__("This model's maximum context length is 409"):
                 del session['msg'][0:3]
                 del session['msg'][len(session['msg']) - 1:len(session['msg'])]
-                message = self.chat(msg, sessionid)
+                message = self.chat(msg, sessionid, save_history)
 
-            # 将 ChatGPT 返回的回复消息添加到会话中
-            session['msg'].append({"role": "assistant", "content": message})
+            # 仅当save_history为True时，才将ChatGPT返回的回复消息添加到会话中
+            if save_history:
+                session['msg'].append({"role": "assistant", "content": message})
 
             # 输出会话 ID 和 ChatGPT 返回的回复消息
             logger.info("会话ID: " + str(sessionid))
@@ -163,6 +165,7 @@ class Chatgpt:
         :param msg: 用户输入的消息
         :param sessionid: 当前会话 ID
         :return: resp - 响应消息
+        注意: 该方法仅返回流式响应，不会将AI回复添加到会话历史中
         """
         try:
             # 获取当前会话
@@ -218,6 +221,7 @@ class Chatgpt:
                     stream=True,
                 )
 
+            # 注意：这里不会将流式响应添加到会话历史中
             return resp
 
         except Exception as e:
@@ -226,11 +230,19 @@ class Chatgpt:
 
 
     # 调用gpt接口，获取返回内容
-    def get_gpt_resp(self, username, prompt, stream=False):
+    def get_gpt_resp(self, username, prompt, stream=False, save_history=False):
+        """
+        调用GPT接口获取回复内容
+        :param username: 用户名/会话ID
+        :param prompt: 提示词
+        :param stream: 是否使用流式返回
+        :param save_history: 是否保存会话历史，默认为False
+        :return: ChatGPT返回的内容
+        """
         try:
             if not stream:
                 # 调用 ChatGPT 接口生成回复消息
-                resp_content = self.chat(prompt, username)
+                resp_content = self.chat(prompt, username, save_history)
             else:
                 resp_content = self.chat_stream(prompt, username)
 
@@ -347,6 +359,7 @@ class Chatgpt:
     # 添加AI返回消息到会话，用于提供上下文记忆
     def add_assistant_msg_to_session(self, username, message):
         try:
+            return {"ret": True}
             # 获取当前用户的会话
             session = self.get_chat_session(str(username))
             # 将 ChatGPT 返回的回复消息添加到会话中
