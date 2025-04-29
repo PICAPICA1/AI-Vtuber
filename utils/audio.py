@@ -1320,7 +1320,8 @@ class Audio:
                 self.action_mapping_handle(content_copy, audio_url, voice_tmp_path)
 
             # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
-            if self.config.get("play_audio", "enable"):
+            # 特殊处理，强制不播放音频 给unity播放
+            if self.config.get("play_audio", "enable") and False:
                 self.data_priority_insert("待播放音频列表", data_json)
 
             return True
