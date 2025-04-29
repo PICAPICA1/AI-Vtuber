@@ -2421,7 +2421,7 @@ class Audio:
             dict: 包含匹配结果的字典，格式如下:
                 {
                     "action_name": 匹配到的动作名称,
-                    "action_group": 匹配到的动作组,
+                    "group_id": 匹配到的动作组,
                     "match_word": 匹配到的关键词,
                     "priority": 匹配优先级,
                     "timestamp": 匹配时间戳,
@@ -2497,8 +2497,8 @@ class Audio:
                 return None
                 
             # 根据llm_content进行动作映射
-            action_groups = action_config.get("groups", [])
-            if not action_groups:
+            group_ids = action_config.get("groups", [])
+            if not group_ids:
                 logger.info("动作映射配置中没有定义动作组")
                 return None
                 
@@ -2516,7 +2516,7 @@ class Audio:
             if name_matches:
                 for name_match in name_matches:
                     # 遍历所有动作组查找匹配
-                    for group in action_groups:
+                    for group in group_ids:
                         group_id = group.get("id")
                         actions = group.get("actions", [])
                         
@@ -2530,7 +2530,7 @@ class Audio:
                                 # 找到精确匹配，直接返回结果
                                 matched_result = {
                                     "action_name": action_name,
-                                    "action_group": group_id,
+                                    "group_id": group_id,
                                     "match_word": action_name,
                                     "priority": priority,
                                     "audio_url": audio_url,
@@ -2563,7 +2563,7 @@ class Audio:
             logger.info("在[]中未找到精确匹配，尝试匹配关键词")
             
             # 遍历所有动作组
-            for group in action_groups:
+            for group in group_ids:
                 group_id = group.get("id")
                 actions = group.get("actions", [])
                 
@@ -2582,7 +2582,7 @@ class Audio:
                                 logger.info(f"匹配到英文关键词: {word}")
                                 matched_actions.append({
                                     "action_name": action_name,
-                                    "action_group": group_id,
+                                    "group_id": group_id,
                                     "match_word": word,
                                     "priority": priority,
                                     "audio_url": audio_url,
@@ -2594,7 +2594,7 @@ class Audio:
                                 logger.info(f"匹配到中文关键词: {word}")
                                 matched_actions.append({
                                     "action_name": action_name,
-                                    "action_group": group_id,
+                                    "group_id": group_id,
                                     "match_word": word,
                                     "priority": priority,
                                     "audio_url": audio_url,
@@ -2635,7 +2635,7 @@ class Audio:
                     
                     # 从动作组1中随机选择一个动作
                     group_1_actions = []
-                    for group in action_groups:
+                    for group in group_ids:
                         if group.get("id") == 1:
                             group_1_actions = group.get("actions", [])
                             break
@@ -2645,7 +2645,7 @@ class Audio:
                         selected_action = random.choice(group_1_actions)
                         matched_result = {
                             "action_name": selected_action.get("name", ""),
-                            "action_group": 1,
+                            "group_id": 1,
                             "match_word": "强制匹配",
                             "priority": selected_action.get("priority", 0),
                             "audio_url": audio_url,

@@ -43,7 +43,7 @@ class CommonResult(BaseModel):
 class ActionMappingRecord(BaseModel):
     id: int
     action_name: str
-    action_group: int
+    group_id: int
     match_word: str
     priority: int
     timestamp: int

@@ -365,7 +365,7 @@ def start_server():
                 try:
                     action_data = {
                         "action_name": action_name,
-                        "action_group": action_id
+                        "group_id": action_id
                     }
                     unity_queue_handler.add_action_mapping(action_data)
                     return CommonResult(code=200, message="添加动作映射记录成功！")
