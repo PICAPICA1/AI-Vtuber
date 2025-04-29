@@ -1746,7 +1746,7 @@ class Common:
             logger.debug(f"destination_directory={destination_directory}")
 
             # 构造文件名和保存路径
-            destination_path = os.path.join(destination_directory, f"camera_{camera_index}_{cv2.getTickCount()}")
+            destination_path = os.path.join(destination_directory, f"camera_{camera_index}_{self.get_bj_time(4)}")
             logger.debug(f"destination_path={destination_path}")
 
             # 在系统临时目录中创建一个临时文件
@@ -1764,7 +1764,7 @@ class Common:
                 return None
             
             # 将文件从临时路径移动到目标路径
-            final_path = self.move_file(temp_path, destination_path, f"camera_{camera_index}_{cv2.getTickCount()}", "png")
+            final_path = self.move_file(temp_path, destination_path, f"camera_{camera_index}_{self.get_bj_time(4)}", "png")
             
             return final_path
         except Exception as e:
