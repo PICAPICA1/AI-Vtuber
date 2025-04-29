@@ -3215,8 +3215,8 @@ class My_handle(metaclass=SingletonMeta):
                 )
 
                 vl_ret_content = self.llm_handle(chat_type, {
-                    "ori_content": My_handle.config.get("image_recognition", "prompt") + data_json["content"],
-                    "content": My_handle.config.get("image_recognition", "prompt") + data_json["content"],
+                    "ori_content": My_handle.config.get("image_recognition", "prompt"),
+                    "content": My_handle.config.get("image_recognition", "prompt"),
                     "img_data": screenshot_path
                 }, type="vision", webui_show=False)
 
