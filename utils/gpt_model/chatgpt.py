@@ -18,10 +18,20 @@ class Chatgpt:
 
     def __init__(self, data_openai, data_chatgpt):
         self.common = Common()
+
+        import json
+        # 直接写死从配置文件config.json中获取
+        with open("config.json", 'r', encoding="utf-8") as f:
+            self.config = json.load(f)
+
+        self.data_chatgpt = self.config.get("chatgpt", {})
+        self.data_openai = self.config.get("openai", {})
+
+        logger.warning(f"data_chatgpt={self.data_chatgpt}")
+        logger.warning(f"data_openai={self.data_openai}")
+
         # 设置会话初始值
         self.session_config = {'msg': [{"role": "system", "content": data_chatgpt["preset"]}]}
-        self.data_openai = data_openai
-        self.data_chatgpt = data_chatgpt
 
 
     # chatgpt相关
@@ -34,6 +44,14 @@ class Chatgpt:
         :return: ChatGPT 返回的回复内容
         """
         try:
+            import json
+            # 直接写死从配置文件config.json中获取
+            with open("config.json", 'r', encoding="utf-8") as f:
+                self.config = json.load(f)
+                
+            logger.warning(f"data_chatgpt={self.data_chatgpt}")
+            logger.warning(f"data_openai={self.data_openai}")
+            
             # 获取当前会话
             session = self.get_chat_session(sessionid)
 
@@ -240,6 +258,12 @@ class Chatgpt:
         :return: ChatGPT返回的内容
         """
         try:
+            self.data_chatgpt = self.config.get("chatgpt", {})
+            self.data_openai = self.config.get("openai", {})
+
+            logger.warning(f"data_chatgpt={self.data_chatgpt}")
+            logger.warning(f"data_openai={self.data_openai}")
+            
             if not stream:
                 # 调用 ChatGPT 接口生成回复消息
                 resp_content = self.chat(prompt, username, save_history)
@@ -264,6 +288,12 @@ class Chatgpt:
             OpenAI接口的响应内容
         """
         try:
+            self.data_chatgpt = self.config.get("chatgpt", {})
+            self.data_openai = self.config.get("openai", {})
+
+            logger.warning(f"data_chatgpt={self.data_chatgpt}")
+            logger.warning(f"data_openai={self.data_openai}")
+            
             # 检查 img_data 的类型
             if isinstance(img_data, str):  # 如果是字符串，假定为文件路径
                 import base64
