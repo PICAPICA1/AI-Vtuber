@@ -27,12 +27,16 @@ class Chatgpt:
         self.data_chatgpt = self.config.get("chatgpt", {})
         self.data_openai = self.config.get("openai", {})
 
-        logger.warning(f"data_chatgpt={self.data_chatgpt}")
-        logger.warning(f"data_openai={self.data_openai}")
+        # logger.warning(f"data_chatgpt={self.data_chatgpt}")
+        # logger.warning(f"data_openai={self.data_openai}")
+
+        self.preset = self.data_chatgpt.get("preset", "")
+        logger.warning(f"preset={self.preset}")
 
         if data_chatgpt and data_chatgpt != {}:
             # 设置会话初始值
-            self.session_config = {'msg': [{"role": "system", "content": data_chatgpt["preset"]}]}
+            self.session_config = {'msg': []}
+            # self.session_config = {'msg': [{"role": "system", "content": data_chatgpt["preset"]}]}
         else:
             self.session_config = {'msg': []}
 
@@ -59,7 +63,7 @@ class Chatgpt:
             session = self.get_chat_session(sessionid)
 
             # 将用户输入的消息添加到会话中
-            session['msg'].append({"role": "user", "content": msg})
+            session['msg'].append({"role": "user", "content": self.preset + "\n" + msg})
 
             # 添加当前时间到会话中
             session['msg'][1] = {"role": "system", "content": "current time is:" + self.common.get_bj_time()}
@@ -193,10 +197,10 @@ class Chatgpt:
             session = self.get_chat_session(sessionid)
 
             # 将用户输入的消息添加到会话中
-            session['msg'].append({"role": "user", "content": msg})
+            session['msg'].append({"role": "user", "content": self.preset + "\n" + msg})
 
             # 添加当前时间到会话中
-            session['msg'][1] = {"role": "system", "content": "current time is:" + self.common.get_bj_time()}
+            # session['msg'][1] = {"role": "system", "content": "current time is:" + self.common.get_bj_time()}
 
             # logger.warning(sessionid)
             # logger.warning(session)
@@ -264,8 +268,8 @@ class Chatgpt:
             self.data_chatgpt = self.config.get("chatgpt", {})
             self.data_openai = self.config.get("openai", {})
 
-            logger.warning(f"data_chatgpt={self.data_chatgpt}")
-            logger.warning(f"data_openai={self.data_openai}")
+            # logger.warning(f"data_chatgpt={self.data_chatgpt}")
+            # logger.warning(f"data_openai={self.data_openai}")
             
             if not stream:
                 # 调用 ChatGPT 接口生成回复消息
@@ -295,10 +299,14 @@ class Chatgpt:
             # 直接写死从配置文件config.json中获取
             with open("config.json", 'r', encoding="utf-8") as f:
                 self.config = json.load(f)
-                
+
             self.data_chatgpt = self.config.get("image_recognition", {})
             self.data_chatgpt = self.data_chatgpt.get("openai", {})
             self.data_openai = self.data_chatgpt
+
+            new_prompt = self.data_chatgpt.get("preset", "")
+            if new_prompt != "":
+                prompt = new_prompt
 
             logger.warning(f"data_chatgpt={self.data_chatgpt}")
             # logger.warning(f"data_openai={self.data_openai}")

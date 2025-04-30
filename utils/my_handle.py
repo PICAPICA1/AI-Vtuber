@@ -3222,7 +3222,7 @@ class My_handle(metaclass=SingletonMeta):
 
                 if vl_ret_content is not None:
                     logger.warning(f"vl返回内容={vl_ret_content}")
-                    data_json["content"] = '直播场景描述 ： ' + vl_ret_content + '\n' + data_json["content"]
+                    data_json["content"] = '###\n直播场景描述 ： ' + vl_ret_content + '\n评论：' + data_json["content"]
                     
                 # 当前选用的LLM类型是否支持stream，并且启用stream
                 if "stream" in My_handle.config.get(chat_type) and My_handle.config.get(chat_type, "stream"):
