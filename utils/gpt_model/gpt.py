@@ -83,7 +83,7 @@ class GPT_Model:
             "gemini": Gemini,
             "zhipu": Zhipu,
             "blip": Blip,
-            "openai": Chatgpt
+            "openai": Chatgpt,
         }
 
         setattr(self, model_name, model_classes[model_name](config))

@@ -16,7 +16,7 @@ class Chatgpt:
     data_openai = {}
     data_chatgpt = {}
 
-    def __init__(self, data_openai, data_chatgpt):
+    def __init__(self, data_openai: dict=None, data_chatgpt: dict=None):
         self.common = Common()
 
         import json
@@ -30,8 +30,11 @@ class Chatgpt:
         logger.warning(f"data_chatgpt={self.data_chatgpt}")
         logger.warning(f"data_openai={self.data_openai}")
 
-        # 设置会话初始值
-        self.session_config = {'msg': [{"role": "system", "content": data_chatgpt["preset"]}]}
+        if data_chatgpt and data_chatgpt != {}:
+            # 设置会话初始值
+            self.session_config = {'msg': [{"role": "system", "content": data_chatgpt["preset"]}]}
+        else:
+            self.session_config = {'msg': []}
 
 
     # chatgpt相关
@@ -288,15 +291,18 @@ class Chatgpt:
             OpenAI接口的响应内容
         """
         try:
-            self.data_chatgpt = self.config.get("chatgpt", {})
-            self.data_openai = self.config.get("openai", {})
+            self.data_chatgpt = self.config.get("image_recognition", {})
+            self.data_chatgpt = self.data_chatgpt.get("openai", {})
+            self.data_openai = self.data_chatgpt
 
             logger.warning(f"data_chatgpt={self.data_chatgpt}")
-            logger.warning(f"data_openai={self.data_openai}")
+            # logger.warning(f"data_openai={self.data_openai}")
             
             # 检查 img_data 的类型
             if isinstance(img_data, str):  # 如果是字符串，假定为文件路径
                 import base64
+
+                # logger.warning(f"img_data is a string: {img_data}")
 
                 # 读取本地图片文件
                 with open(img_data, "rb") as image_file:
@@ -323,10 +329,11 @@ class Chatgpt:
             openai.api_key = self.data_openai['api_key'][self.current_key_index]
             
             logger.debug(f"openai.__version__={openai.__version__}")
+
+            logger.warning(f"VL调用的提示词为：{prompt}")
             
             # 准备消息
             messages = [
-                {"role": "system", "content": self.data_chatgpt["preset"]},
                 {
                     "role": "user", 
                     "content": [

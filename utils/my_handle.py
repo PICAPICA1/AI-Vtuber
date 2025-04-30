@@ -1600,7 +1600,7 @@ class My_handle(metaclass=SingletonMeta):
                     "reread": lambda: data["content"]
                 }
             elif type == "vision":
-                # logger.warning(f"chat_type={chat_type}, data={data}")
+                logger.warning(f"chat_type={chat_type}, data={data}")
 
                 # 使用 getattr 来动态获取属性
                 if getattr(self, chat_type, None) is None:
@@ -3214,14 +3214,14 @@ class My_handle(metaclass=SingletonMeta):
                     My_handle.config.get("image_recognition", "cam_index")
                 )
 
-                vl_ret_content = self.llm_handle(chat_type, {
+                vl_ret_content = self.llm_handle("openai", {
                     "ori_content": My_handle.config.get("image_recognition", "prompt"),
                     "content": My_handle.config.get("image_recognition", "prompt"),
                     "img_data": screenshot_path
                 }, type="vision", webui_show=False)
 
                 if vl_ret_content is not None:
-                    logger.warning(f"vl_ret_content={vl_ret_content}")
+                    logger.warning(f"vl返回内容={vl_ret_content}")
                     data_json["content"] = '直播场景描述 ： ' + vl_ret_content + '\n' + data_json["content"]
                     
                 # 当前选用的LLM类型是否支持stream，并且启用stream
