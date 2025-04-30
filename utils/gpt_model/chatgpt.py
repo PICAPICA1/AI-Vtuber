@@ -66,7 +66,7 @@ class Chatgpt:
             session['msg'].append({"role": "user", "content": self.preset + "\n" + msg})
 
             # 添加当前时间到会话中
-            session['msg'][1] = {"role": "system", "content": "current time is:" + self.common.get_bj_time()}
+            # session['msg'][1] = {"role": "system", "content": "current time is:" + self.common.get_bj_time()}
 
             # 调用 ChatGPT 接口生成回复消息
             message = self.chat_with_gpt(session['msg'])
@@ -108,7 +108,7 @@ class Chatgpt:
         if sessionid not in self.sessions:
             config = deepcopy(self.session_config)
             config['id'] = sessionid
-            config['msg'].append({"role": "system", "content": "current time is:" + self.common.get_bj_time()})
+            # config['msg'].append({"role": "system", "content": "current time is:" + self.common.get_bj_time()})
             self.sessions[sessionid] = config
         return self.sessions[sessionid]
 
