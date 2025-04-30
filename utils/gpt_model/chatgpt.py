@@ -52,8 +52,8 @@ class Chatgpt:
             with open("config.json", 'r', encoding="utf-8") as f:
                 self.config = json.load(f)
                 
-            logger.warning(f"data_chatgpt={self.data_chatgpt}")
-            logger.warning(f"data_openai={self.data_openai}")
+            # logger.warning(f"data_chatgpt={self.data_chatgpt}")
+            # logger.warning(f"data_openai={self.data_openai}")
             
             # 获取当前会话
             session = self.get_chat_session(sessionid)
@@ -291,6 +291,11 @@ class Chatgpt:
             OpenAI接口的响应内容
         """
         try:
+            import json
+            # 直接写死从配置文件config.json中获取
+            with open("config.json", 'r', encoding="utf-8") as f:
+                self.config = json.load(f)
+                
             self.data_chatgpt = self.config.get("image_recognition", {})
             self.data_chatgpt = self.data_chatgpt.get("openai", {})
             self.data_openai = self.data_chatgpt
