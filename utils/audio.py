@@ -2630,7 +2630,7 @@ class Audio:
                 Audio.no_match_count += 1
                 logger.info(f"未匹配到任何动作，连续未匹配计数: {Audio.no_match_count}")
                 
-                if Audio.no_match_count >= 3:
+                if Audio.no_match_count >= 1:
                     # 连续三次未匹配，强制匹配动作组1
                     Audio.no_match_count = 0
                     
