@@ -6648,9 +6648,8 @@ def goto_func_page():
                                     )
                                     ui.notify(f'机位切换命令已发送: {control_value}', type='positive')
                                 elif control_type == "action":
-                                    # 对于动作执行，需要action_name和action_id两个参数
                                     # 这里假设control_value是动作名称，为动作ID使用默认值1
-                                    url = f"{api_base_url}/add_action_mapping?action_name={control_value}&action_id=1"
+                                    url = f"{api_base_url}/add_action_mapping?group_id={control_value}"
                                     await common.send_async_request(
                                         url=url,
                                         method="POST"
