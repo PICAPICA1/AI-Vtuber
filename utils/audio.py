@@ -1311,8 +1311,8 @@ class Audio:
             # 更新音频路径
             data_json["voice_path"] = voice_tmp_path
 
-            # 动作映射
-            if self.config.get("action_mapping", "enable") and message['type'] in ["comment"]:
+            # 动作映射 触发类型：弹幕、入场欢迎
+            if self.config.get("action_mapping", "enable") and message['type'] in ["comment", "entrance"]:
                 logger.warning(data_json)
                 # 将音频路径转换为音频url，如E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
                 # 其中127.0.0.1:8081 是webui的ip和端口，从config中读取，如果ip为0.0.0.0，则表示为使用上网卡的ip做为url的ip
