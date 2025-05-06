@@ -1850,6 +1850,7 @@ def start_server():
 # 退出程序
 def exit_handler(signum, frame):
     logger.info("收到信号:", signum)
+    os._exit(0)
 
 
 if __name__ == "__main__":

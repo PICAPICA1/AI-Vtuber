@@ -1,7 +1,6 @@
 import json
 import copy
 import traceback
-from volcenginesdkarkruntime import Ark
 
 from utils.common import Common
 from utils.my_log import logger
@@ -17,6 +16,8 @@ class VolcEngine:
         self.history = []
 
         try:
+            from volcenginesdkarkruntime import Ark
+            
             self.client = Ark(api_key=self.config_data["api_key"])
         except Exception as e:
             logger.error(traceback.format_exc())

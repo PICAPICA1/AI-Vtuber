@@ -27,6 +27,7 @@ def start_listen(config, common, my_handle, platform: str):
         if config.get("bilibili", "login_type") == "cookie":
             bilibili_cookie = config.get("bilibili", "cookie")
             SESSDATA = common.parse_cookie_data(bilibili_cookie, "SESSDATA")
+            # logger.info(f"SESSDATA={SESSDATA}")
         elif config.get("bilibili", "login_type") == "open_live":
             # 在开放平台申请的开发者密钥 https://open-live.bilibili.com/open-manage
             ACCESS_KEY_ID = config.get("bilibili", "open_live", "ACCESS_KEY_ID")
@@ -45,6 +46,8 @@ def start_listen(config, common, my_handle, platform: str):
         my_handle.abnormal_alarm_handle("platform")
 
     async def main_func():
+        global session
+        
         if config.get("bilibili", "login_type") == "open_live":
             await run_single_client2()
         else:
@@ -57,6 +60,8 @@ def start_listen(config, common, my_handle, platform: str):
                 await session.close()
 
     def init_session():
+        global session
+
         cookies = http.cookies.SimpleCookie()
         cookies["SESSDATA"] = SESSDATA
         cookies["SESSDATA"]["domain"] = "bilibili.com"
@@ -73,6 +78,8 @@ def start_listen(config, common, my_handle, platform: str):
         """
         演示监听一个直播间
         """
+        global session
+        
         room_id = random.choice(TEST_ROOM_IDS)
         client = blivedm.BLiveClient(room_id, session=session)
         handler = MyHandler()
@@ -115,6 +122,8 @@ def start_listen(config, common, my_handle, platform: str):
         """
         演示同时监听多个直播间
         """
+        global session
+        
         clients = [
             blivedm.BLiveClient(room_id, session=session)
             for room_id in TEST_ROOM_IDS
