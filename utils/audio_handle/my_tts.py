@@ -3,7 +3,7 @@ import aiohttp, requests, ssl, asyncio
 from urllib.parse import urlencode
 from gradio_client import Client
 import traceback
-import edge_tts
+
 from urllib.parse import urljoin
 import random, copy
 
@@ -340,6 +340,8 @@ class MY_TTS:
     # 请求Edge-TTS接口获取合成后的音频路径
     async def edge_tts_api(self, data):
         try:
+            import edge_tts
+            
             file_name = 'edge_tts_' + self.common.get_bj_time(4) + '.mp3'
             voice_tmp_path = self.common.get_new_audio_path(self.audio_out_path, file_name)
             # voice_tmp_path = './out/' + self.common.get_bj_time(4) + '.mp3'
