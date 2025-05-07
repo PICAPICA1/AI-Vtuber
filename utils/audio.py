@@ -1313,8 +1313,10 @@ class Audio:
             # 更新音频路径
             data_json["voice_path"] = voice_tmp_path
 
+            logger.info(f"data_json={data_json}")
+
             # 动作映射 触发类型：弹幕、入场欢迎
-            if self.config.get("action_mapping", "enable") and message['type'] in ["comment", "entrance"]:
+            if self.config.get("action_mapping", "enable") and message['type'] in ["comment", "entrance", "follow", "gift"]:
                 logger.warning(data_json)
                 # 将音频路径转换为音频url，如E:\GitHub_pro\AI-Vtuber\out\gpt_sovits_7.wav 转换为 http://127.0.0.1:8081/out/gpt_sovits_7.wav
                 # 其中127.0.0.1:8081 是webui的ip和端口，从config中读取，如果ip为0.0.0.0，则表示为使用上网卡的ip做为url的ip
@@ -1328,15 +1330,20 @@ class Audio:
 
             return True
 
-        # 先对message["content"]进行正则匹配「」中提取的内容是要合成的文本,[]中提取的内容是要合成的动作
-        pattern = r"「(.*?)」"
-        matches = re.findall(pattern, message["content"])
+        if message["type"] == "comment":
+            # 先对message["content"]进行正则匹配「」中提取的内容是要合成的文本,[]中提取的内容是要合成的动作
+            pattern = r"「(.*?)」"
+            matches = re.findall(pattern, message["content"])
 
-        # 假设只关心第一个匹配到的内容作为要合成的文本
-        if not matches or len(matches) == 0:
-            return False
+            # 假设只关心第一个匹配到的内容作为要合成的文本
+            if not matches or len(matches) == 0:
+                return False
+
+            message["content"] = matches[0]
+
         content_copy = copy.copy(message["content"])
-        message["content"] = matches[0]
+
+        logger.info(f"即将合成音频，message={message}")
         resp_json = await self.tts_handle(message)
         if resp_json["result"]["code"] == 200:
             voice_tmp_path = resp_json["result"]["audio_path"]

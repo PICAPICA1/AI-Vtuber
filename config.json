@@ -1926,7 +1926,7 @@
     }
   },
   "webui": {
-    "ip": "192.168.3.219",
+    "ip": "127.0.0.1",
     "port": 8083,
     "title": "AI Vtuber",
     "auto_run": false,
