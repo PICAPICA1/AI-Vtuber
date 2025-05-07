@@ -1339,9 +1339,11 @@ class Audio:
             if not matches or len(matches) == 0:
                 return False
 
+            content_copy = copy.copy(message["content"])
             message["content"] = matches[0]
-
-        content_copy = copy.copy(message["content"])
+        else:
+            content_copy = copy.copy(message["content"])
+        
 
         logger.info(f"即将合成音频，message={message}")
         resp_json = await self.tts_handle(message)
