@@ -13,12 +13,8 @@ from functools import partial
 from .config import Config
 from .common import Common
 from .audio import Audio
-from .gpt_model.gpt import GPT_MODEL
 from .my_log import logger
 from .db import SQLiteDB
-from .my_translate import My_Translate
-
-from .luoxi_project.live_comment_assistant import send_msg_to_live_comment_assistant
 
 
 """
@@ -119,8 +115,6 @@ class My_handle(metaclass=SingletonMeta):
                 My_handle.config = Config(config_path)
             if My_handle.audio is None:
                 My_handle.audio = Audio(config_path)
-            if My_handle.my_translate is None:
-                My_handle.my_translate = My_Translate(config_path)
 
             self.proxy = None
             # self.proxy = {
@@ -461,31 +455,8 @@ class My_handle(metaclass=SingletonMeta):
     def get_audio_info(self):
         return My_handle.audio.get_audio_info()
 
-    def get_chat_model(self, chat_type, config):
-        if chat_type == "claude":
-            self.claude = GPT_MODEL.get(chat_type)
-            if not self.claude.reset_claude():
-                logger.error("重置Claude会话失败喵~")
-        elif chat_type == "claude2":
-            GPT_MODEL.set_model_config(chat_type, config.get(chat_type))
-            self.claude2 = GPT_MODEL.get(chat_type)
-            if self.claude2.get_organization_id() is None:
-                logger.error("重置Claude2会话失败喵~")
-        else:
-            if chat_type in ["chatterbot", "chat_with_file"]:
-                # 对这些类型做特殊处理
-                pass
-            else:
-                GPT_MODEL.set_model_config(chat_type, config.get(chat_type))
-            self.__dict__[chat_type] = GPT_MODEL.get(chat_type)
-
-    def get_vision_model(self, chat_type, config):
-        GPT_MODEL.set_vision_model_config(chat_type, config)
-        self.image_recognition_model = GPT_MODEL.get(chat_type)
-
     def handle_chat_type(self):
         chat_type = My_handle.config.get("chat_type")
-        self.get_chat_model(chat_type, My_handle.config)
 
         if chat_type == "chatterbot":
             from chatterbot import ChatBot
@@ -498,35 +469,13 @@ class My_handle(metaclass=SingletonMeta):
             except Exception as e:
                 logger.info(e)
                 exit(0)
-        elif chat_type == "chat_with_file":
-            from utils.chat_with_file.chat_with_file import Chat_with_file
-            self.chat_with_file = Chat_with_file(My_handle.config.get("chat_with_file"))
-        elif chat_type == "game":
-            self.game = importlib.import_module("game." + My_handle.config.get("game", "module_name"))
 
     # 配置加载
     def config_load(self):
         self.session_config = {'msg': [{"role": "system", "content": My_handle.config.get('chatgpt', 'preset')}]}
 
-        # 设置GPT_Model全局模型列表
-        GPT_MODEL.set_model_config("openai", My_handle.config.get("openai"))
-        GPT_MODEL.set_model_config("chatgpt", My_handle.config.get("chatgpt"))
-        GPT_MODEL.set_model_config("claude", My_handle.config.get("claude"))  
-
         # 聊天相关类实例化
         self.handle_chat_type()
-
-        # 判断是否使能了SD
-        if My_handle.config.get("sd")["enable"]:
-            from utils.sd import SD
-
-            self.sd = SD(My_handle.config.get("sd"))
-        # 特殊：在SD没有使能情况下，判断图片映射是否使能
-        elif My_handle.config.get("key_mapping", "img_path_trigger_type") != "不启用":
-            # 沿用SD的虚拟摄像头来展示图片
-            from utils.sd import SD
-
-            self.sd = SD({"enable": False, "visual_camera": My_handle.config.get("sd", "visual_camera")})
 
         # 日志文件路径
         self.log_file_path = "./log/log-" + My_handle.common.get_bj_time(1) + ".txt"
@@ -1005,11 +954,6 @@ class My_handle(metaclass=SingletonMeta):
                     "content": resp_content
                 }
 
-                # 洛曦 直播弹幕助手
-                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                    "comment_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
 
                 # 是否启用了周期性触发功能，启用此功能后，数据会被缓存，之后周期到了才会触发
                 if My_handle.config.get("local_qa", "periodic_trigger", "enable"):
@@ -1445,11 +1389,6 @@ class My_handle(metaclass=SingletonMeta):
 
             logger.debug(message)
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "reread" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), content))
 
             self.audio_synthesis_handle(message)
         except Exception as e:
@@ -1564,9 +1503,7 @@ class My_handle(metaclass=SingletonMeta):
 
             if type == "chat":
                 # 使用 getattr 来动态获取属性
-                if getattr(self, chat_type, None) is None:
-                    self.get_chat_model(chat_type, My_handle.config)
-                    # setattr(self, chat_type, GPT_MODEL.get(chat_type))
+               
             
                 # 新增LLM需要在这里追加
                 chat_model_methods = {
@@ -1697,11 +1634,6 @@ class My_handle(metaclass=SingletonMeta):
             logger.debug(f"chat_type={chat_type}, data={data}")
 
             if type == "chat":
-                # 使用 getattr 来动态获取属性
-                if getattr(self, chat_type, None) is None:
-                    self.get_chat_model(chat_type, My_handle.config)
-                    # setattr(self, chat_type, GPT_MODEL.get(chat_type))
-            
                 # 新增LLM需要在这里追加
                 chat_model_methods = {
                     "chatgpt": lambda: self.chatgpt.get_gpt_resp(data["username"], data["content"], stream=True),
@@ -1839,11 +1771,6 @@ class My_handle(metaclass=SingletonMeta):
                             "content": tmp_content
                         }
 
-                        # 洛曦 直播弹幕助手
-                        if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                            "comment_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                            "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                            asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), tmp_content))
 
                         self.audio_synthesis_handle(message)
 
@@ -2109,12 +2036,7 @@ class My_handle(metaclass=SingletonMeta):
                                         "content": resp_content
                                     }
 
-                                    # 洛曦 直播弹幕助手
-                                    if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                                        "integral" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                                        "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                                        asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
-                                    
+
                                     self.audio_synthesis_handle(message)
 
                         if integral_data == []:
@@ -2159,11 +2081,6 @@ class My_handle(metaclass=SingletonMeta):
                                     "content": resp_content
                                 }
 
-                                # 洛曦 直播弹幕助手
-                                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                                    "integral" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
                                 
                                 self.audio_synthesis_handle(message)
 
@@ -2241,11 +2158,6 @@ class My_handle(metaclass=SingletonMeta):
                                     "content": resp_content
                                 }
 
-                                # 洛曦 直播弹幕助手
-                                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                                    "integral" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
                                 
 
                                 self.audio_synthesis_handle(message)
@@ -2344,13 +2256,6 @@ class My_handle(metaclass=SingletonMeta):
                                     "content": resp_content
                                 }
 
-                                # 洛曦 直播弹幕助手
-                                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                                    "integral" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
-                                
-                                
                                 self.audio_synthesis_handle(message)
 
                     if integral_data == []:
@@ -2451,11 +2356,6 @@ class My_handle(metaclass=SingletonMeta):
                                 "content": resp_content
                             }
 
-                            # 洛曦 直播弹幕助手
-                            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                                "integral" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
                             
                             
                             self.audio_synthesis_handle(message)
@@ -2526,11 +2426,7 @@ class My_handle(metaclass=SingletonMeta):
 
                 logger.info(f'【触发按键映射】触发文案：{tmp}')
 
-                # 洛曦 直播弹幕助手
-                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                    "key_mapping_copywriting" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), tmp))
+
 
                 # TODO: 播放时的转发没有实现，因为类型定义没有这么细化
                 self.audio_synthesis_handle(message)
@@ -2563,76 +2459,6 @@ class My_handle(metaclass=SingletonMeta):
             except Exception as e:
                 logger.error(traceback.format_exc())
 
-        # 随机获取一个串口发送数据 内容
-        def get_a_serial_send_data_and_send(key_mapping_config, data):
-            try:
-                async def connect_serial_and_send_data(serial_name, baudrate, serial_data_type, data):
-                    from utils.serial_manager_instance import get_serial_manager
-
-                    serial_manager = get_serial_manager()
-                    # 关闭串口 单例没啥用啊，醉了
-                    # resp_json = await serial_manager.disconnect(serial_name)
-                    # 打开串口
-                    resp_json = await serial_manager.connect(serial_name, int(baudrate))
-                
-                    # 发送数据到串口
-                    resp_json = await serial_manager.send_data(serial_name, tmp, serial_data_type)
-
-                    return resp_json
-                    
-                # 随机获取一个文案
-                tmp = random.choice(key_mapping_config["serial_send_data"])
-
-                # 括号语法替换
-                tmp = My_handle.common.brackets_text_randomize(tmp)
-                
-                # 动态变量替换
-                data_json = {
-                    "username": data.get("username", ""),
-                    "gift_name": data.get("gift_name", ""),
-                    "gift_num": data.get("num", ""),
-                    "unit_price": data.get("unit_price", ""),
-                    "total_price": data.get("total_price", ""),
-                    "cur_time": My_handle.common.get_bj_time(5),
-                }
-                tmp = My_handle.common.dynamic_variable_replacement(tmp, data_json)
-
-                # 定义一个函数，通过 serial_name 获取 对应的config配置
-                def get_serial_config(serial_name: str):
-                    for config in My_handle.config.get("serial", "config"):
-                        if config["serial_name"] == serial_name:
-                            return config
-                    return None  # 如果未找到匹配的 serial_name，返回 None
-
-                serial_name = key_mapping_config["serial_name"]
-                tmp_config = get_serial_config(serial_name)
-                if tmp_config:
-                    baudrate = tmp_config["baudrate"]
-                    resp_json = asyncio.run(connect_serial_and_send_data(serial_name, baudrate, tmp_config["serial_data_type"], data))
-                    
-                    logger.info(f'【触发按键映射】触发串口：{tmp}，{resp_json["msg"]}')
-
-                    return tmp
-                
-                logger.error(f"获取串口名：{serial_name} 的配置信息失败，请到 串口 页面检查配置是否正确！")
-            
-                return None
-            except Exception as e:
-                logger.error(traceback.format_exc())
-                return None
-
-        # 获取一个本地图片路径并传递给虚拟摄像头显示
-        def get_a_img_path_and_send(key_mapping_config, data):
-            try:
-                # 随机获取一个图片路径
-                if len(key_mapping_config["img_path"]) <= 0:
-                    return
-                
-                tmp = random.choice(key_mapping_config["img_path"])
-
-                self.sd.set_new_img(tmp)
-            except Exception as e:
-                logger.error(traceback.format_exc())
 
 
         try:
@@ -2654,13 +2480,7 @@ class My_handle(metaclass=SingletonMeta):
                         elif trigger_type == "local_audio_trigger_type":
                             logger.info(f'【触发按键映射】关键词：{keyword} ，触发本地音频')
                             get_a_local_audio_and_audio_play(key_mapping_config, data)
-                        elif trigger_type == "serial_trigger_type":
-                            logger.info(f'【触发按键映射】关键词：{keyword} ，触发串口')
-                            get_a_serial_send_data_and_send(key_mapping_config, data)
-                        elif trigger_type == "img_path_trigger_type":
-                            logger.info(f'【触发按键映射】关键词：{keyword} ，触发图片')
-                            get_a_img_path_and_send(key_mapping_config, data)
-                        
+
                         flag = True
                         
                     single_sentence_trigger_once_enable = My_handle.config.get("key_mapping", f"{trigger_type.split('_')[0]}_single_sentence_trigger_once_enable")
@@ -2686,13 +2506,6 @@ class My_handle(metaclass=SingletonMeta):
                         elif trigger_type == "local_audio_trigger_type":
                             logger.info(f'【触发按键映射】礼物：{gift_name} ，触发本地音频')
                             get_a_local_audio_and_audio_play(key_mapping_config, data)
-                        elif trigger_type == "serial_trigger_type":
-                            logger.info(f'【触发按键映射】礼物：{gift_name} ，触发串口')
-                            get_a_serial_send_data_and_send(key_mapping_config, data)
-                        elif trigger_type == "img_path_trigger_type":
-                            logger.info(f'【触发按键映射】礼物：{gift_name} ，触发图片')
-                            get_a_img_path_and_send(key_mapping_config, data)
-
                         flag = True
                         
                     single_sentence_trigger_once_enable = My_handle.config.get("key_mapping", f"{trigger_type.split('_')[0]}_single_sentence_trigger_once_enable")
@@ -2920,62 +2733,7 @@ class My_handle(metaclass=SingletonMeta):
                 My_handle.live_data[type].append(data)
         return False
 
-    # 判断是否进行联网搜索，返回处理后的结果
-    def search_online_handle(self, content: str):
-        try:
-            if My_handle.config.get("search_online", "enable"):
-                # 是否启用了关键词命令
-                if My_handle.config.get("search_online", "keyword_enable"):
-                    # 没有命中关键词 直接返回
-                    if My_handle.config.get("search_online", "before_keyword") and not any(content.startswith(prefix) for prefix in \
-                        My_handle.config.get("search_online", "before_keyword")):
-                        return content
-                    else:
-                        for prefix in My_handle.config.get("search_online", "before_keyword"):
-                            if content.startswith(prefix):
-                                content = content[len(prefix):]  # 删除匹配的开头
-                                break
-            
-                from .search_engine import search_online
 
-                if My_handle.config.get("search_online", "http_proxy") == "" and My_handle.config.get("search_online", "https_proxy") == "":
-                    proxies = None
-                else:
-                    proxies = {
-                        "http": My_handle.config.get("search_online", "http_proxy"),
-                        "https": My_handle.config.get("search_online", "https_proxy")
-                    }
-                summaries = search_online(
-                    content, 
-                    engine=My_handle.config.get("search_online", "engine"), 
-                    engine_id=int(My_handle.config.get("search_online", "engine_id")), 
-                    count=int(My_handle.config.get("search_online", "count")), 
-                    proxies=proxies
-                )
-                if summaries != []:
-                    # 追加索引编号
-                    indexed_summaries = [f"参考资料{i+1}. {summary}" for i, summary in enumerate(summaries)]
-                    
-                    # 替换掉内容中的多余换行符
-                    cleaned_summaries = [summary.replace('\n', ' ') for summary in indexed_summaries]
-
-                    variables = {
-                        'summary': cleaned_summaries,
-                        'cur_time': My_handle.common.get_bj_time(5),
-                        'data': content
-                    }
-
-                    tmp = My_handle.config.get("search_online", "resp_template")
-
-                    # 使用字典进行字符串替换
-                    if any(var in tmp for var in variables):
-                        content = tmp.format(**{var: value for var, value in variables.items() if var in tmp})
-
-            return content
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            logger.error(f"联网搜索报错: {e}")
-            return content
 
     """                                                              
                                                                            
@@ -3024,13 +2782,6 @@ class My_handle(metaclass=SingletonMeta):
             if self.blacklist_handle(data):
                 return None
             
-            # 弹幕数据经过基本初步筛选后，通过 洛曦直播弹幕助手，可以进行转发。
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "comment" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), content))
-
 
             # 返回给webui的聊天记录
             if My_handle.config.get("talk", "show_chat_log"):
@@ -3279,11 +3030,6 @@ class My_handle(metaclass=SingletonMeta):
                 "content": resp_content
             }
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "comment_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
 
             # 合成音频
             self.audio_synthesis_handle(message)
@@ -3385,12 +3131,7 @@ class My_handle(metaclass=SingletonMeta):
                 "gift_info": data
             }
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "gift_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
-            
+           
 
             # 是否启用了周期性触发功能，启用此功能后，数据会被缓存，之后周期到了才会触发
             if My_handle.config.get("thanks", "gift", "periodic_trigger", "enable"):
@@ -3465,12 +3206,7 @@ class My_handle(metaclass=SingletonMeta):
                 "content": resp_content
             }
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "entrance_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
-            
+
             # 是否启用了周期性触发功能，启用此功能后，数据会被缓存，之后周期到了才会触发
             if My_handle.config.get("thanks", "entrance", "periodic_trigger", "enable"):
                 My_handle.task_data["thanks"]["entrance"]["data"].append(message)
@@ -3530,11 +3266,7 @@ class My_handle(metaclass=SingletonMeta):
                 "content": resp_content
             }
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "follow_reply" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
+           
             
 
             # 是否启用了周期性触发功能，启用此功能后，数据会被缓存，之后周期到了才会触发
@@ -3562,12 +3294,7 @@ class My_handle(metaclass=SingletonMeta):
                 "content": content
             }
 
-            # 洛曦 直播弹幕助手
-            if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                "schedule" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), content))
-            
+
             
             self.audio_synthesis_handle(message)
 
@@ -3636,12 +3363,7 @@ class My_handle(metaclass=SingletonMeta):
                     "content_type": type
                 }
 
-                # 洛曦 直播弹幕助手
-                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                    "idle_time_task" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), content))
-
+                
                 
                 self.audio_synthesis_handle(message)
 
@@ -3758,12 +3480,7 @@ class My_handle(metaclass=SingletonMeta):
                     "content_type": type
                 }
 
-                # 洛曦 直播弹幕助手
-                if My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "enable") and \
-                    "idle_time_task" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "type") and \
-                    "消息产生时" in My_handle.config.get("luoxi_project", "Live_Comment_Assistant", "trigger_position"):
-                    asyncio.run(send_msg_to_live_comment_assistant(My_handle.config.get("luoxi_project", "Live_Comment_Assistant"), resp_content))
-
+                
                 
                 self.audio_synthesis_handle(message)
 

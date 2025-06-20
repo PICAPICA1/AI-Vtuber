@@ -1,0 +1,101 @@
+{
+  "paths": [
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/INSTALLER",
+      "path_type": "hardlink",
+      "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+      "size_in_bytes": 5
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/LICENSE",
+      "path_type": "hardlink",
+      "sha256": "a02f6c638f9fb84d06f7764c3ab085d8af7eda5b93c166da54312479077c6fb0",
+      "size_in_bytes": 1052
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/METADATA",
+      "path_type": "hardlink",
+      "sha256": "f070394898794b061b232dd29f378031ca3098c14097e51d3081c390091d5d5d",
+      "size_in_bytes": 2236
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/RECORD",
+      "path_type": "hardlink",
+      "sha256": "ea527b67050430c4b23b31a9ee2bc2bf8d8885e11805a55be96693f79682f215",
+      "size_in_bytes": 1198
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/REQUESTED",
+      "path_type": "hardlink",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_in_bytes": 0
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/WHEEL",
+      "path_type": "hardlink",
+      "sha256": "db07a93359e4e034b8785a58ad6d534ea3dca0635f1e184efe2e66e1c3a299ba",
+      "size_in_bytes": 92
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/direct_url.json",
+      "path_type": "hardlink",
+      "sha256": "ea1c13bb112706373992223a561b374c26a7f71b8a4c25a63012b66658b48bd3",
+      "size_in_bytes": 95
+    },
+    {
+      "_path": "Lib/site-packages/certifi-2023.5.7.dist-info/top_level.txt",
+      "path_type": "hardlink",
+      "sha256": "28cbb8bd409fb232eb90f6d235d81d7a44bea552730402453bffe723c345ebe5",
+      "size_in_bytes": 8
+    },
+    {
+      "_path": "Lib/site-packages/certifi/__init__.py",
+      "path_type": "hardlink",
+      "sha256": "ab978fce795f3b0f97608395e914e7878e724bd85a37e35bd5dfffe105dcde0d",
+      "size_in_bytes": 94
+    },
+    {
+      "_path": "Lib/site-packages/certifi/__main__.py",
+      "path_type": "hardlink",
+      "sha256": "c410688fdd394d45812d118034e71fee88ba7beddd30fe1c1281bd3b232cd758",
+      "size_in_bytes": 243
+    },
+    {
+      "_path": "Lib/site-packages/certifi/__pycache__/__init__.cpython-310.pyc",
+      "path_type": "hardlink",
+      "sha256": "ae5856458d7f986669f7969dcba0f579e8d6b2e74b3de9d573babb986145da5d",
+      "size_in_bytes": 243
+    },
+    {
+      "_path": "Lib/site-packages/certifi/__pycache__/__main__.cpython-310.pyc",
+      "path_type": "hardlink",
+      "sha256": "c5a87aeefad968662fe1b1ab90bb5dcc7aff8fed8d373338f8932566f07615c7",
+      "size_in_bytes": 381
+    },
+    {
+      "_path": "Lib/site-packages/certifi/__pycache__/core.cpython-310.pyc",
+      "path_type": "hardlink",
+      "sha256": "1f4f56663a82630a2c73159bf48613005dd486d244086fa52a12565aa4e31b6c",
+      "size_in_bytes": 1851
+    },
+    {
+      "_path": "Lib/site-packages/certifi/cacert.pem",
+      "path_type": "hardlink",
+      "sha256": "b301535dca491d9814ea28faa320ac7a19d0f5d94237996fa0a3b5a936432514",
+      "size_in_bytes": 278952
+    },
+    {
+      "_path": "Lib/site-packages/certifi/core.py",
+      "path_type": "hardlink",
+      "sha256": "9617b0cf4cc56f66f850bb10bab1259a5a18c10a1e7235b33ea63aecff13ee23",
+      "size_in_bytes": 4219
+    },
+    {
+      "_path": "Lib/site-packages/certifi/py.typed",
+      "path_type": "hardlink",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_in_bytes": 0
+    }
+  ],
+  "paths_version": 1
+}

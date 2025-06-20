@@ -1,0 +1,190 @@
+2025-06-17 22:59:25.924 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 22:59:32.152 | INFO     | __main__:save_config:1633 - 配置数据已成功写入文件！
+2025-06-17 22:59:35.447 | INFO     | __main__:gsvi_set_init:379 - {'msg': '获取成功', 'models': {'原神-中文-克洛琳德_ZH': {'中文': ['默认']}, '原神-中文-可莉_ZH': {'中文': ['默认']}, '原神-中文-基尼奇_ZH': {'中文': ['默认']}}}
+2025-06-17 22:59:38.383 | INFO     | __main__:save_config:1633 - 配置数据已成功写入文件！
+2025-06-17 22:59:40.198 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 22:59:40.199 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:00:21.082 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:01:11.556 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:01:17.381 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:01:17.382 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:07:17.023 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:07:20.853 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:07:20.855 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:07:22.679 | INFO     | utils.my_handle:__init__:109 - 初始化My_handle...
+2025-06-17 23:07:23.416 | INFO     | utils.audio:start_only_play_copywriting:1601 - 文案播放线程运行中...
+2025-06-17 23:07:23.416 | INFO     | utils.audio:message_queue_thread:290 - 创建音频合成消息队列线程
+2025-06-17 23:07:23.729 | ERROR    | utils.my_handle:__init__:183 - Traceback (most recent call last):
+  File "D:\Python\project\AI-Vtuber\utils\my_handle.py", line 176, in __init__
+    self.config_load()
+  File "D:\Python\project\AI-Vtuber\utils\my_handle.py", line 479, in config_load
+    self.handle_chat_type()
+  File "D:\Python\project\AI-Vtuber\utils\my_handle.py", line 460, in handle_chat_type
+    self.get_chat_model(chat_type, My_handle.config)
+AttributeError: 'My_handle' object has no attribute 'get_chat_model'
+
+2025-06-17 23:07:23.730 | INFO     | utils.audio:all_data_reload:1706 - 重载所有文案数据
+2025-06-17 23:07:23.731 | INFO     | __main__:start_server:313 - 当前平台：bilibili2
+2025-06-17 23:07:23.734 | ERROR    | utils.audio:only_play_copywriting:1790 - Traceback (most recent call last):
+  File "D:\Python\project\AI-Vtuber\utils\audio.py", line 1732, in only_play_copywriting
+    file_path_arr, audio_path_arr, play_list_arr, continuous_play_num_arr, max_play_time_arr = all_data_reload(file_path_arr, audio_path_arr, play_list_arr, continuous_play_num_arr, max_play_time_arr)
+  File "D:\Python\project\AI-Vtuber\utils\audio.py", line 1715, in all_data_reload
+    for copywriting_config in copywriting_configs:
+TypeError: 'NoneType' object is not iterable
+
+2025-06-17 23:07:23.867 | INFO     | __main__:http_api_thread:294 - HTTP API线程已启动！
+2025-06-17 23:10:43.750 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:10:48.044 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:10:48.047 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:10:49.874 | INFO     | utils.my_handle:__init__:109 - 初始化My_handle...
+2025-06-17 23:10:50.586 | INFO     | utils.audio:start_only_play_copywriting:1601 - 文案播放线程运行中...
+2025-06-17 23:10:50.587 | INFO     | utils.audio:message_queue_thread:290 - 创建音频合成消息队列线程
+2025-06-17 23:10:50.819 | INFO     | utils.my_handle:config_load:483 - ./log/log-2025-6-17.txt 日志文件已存在，跳过
+2025-06-17 23:10:50.821 | INFO     | utils.audio:all_data_reload:1706 - 重载所有文案数据
+2025-06-17 23:10:50.823 | INFO     | utils.my_handle:config_load:496 - ./log/comment-2025-6-17.txt 弹幕文件已创建
+2025-06-17 23:10:50.825 | ERROR    | utils.audio:only_play_copywriting:1790 - Traceback (most recent call last):
+  File "D:\Python\project\AI-Vtuber\utils\audio.py", line 1732, in only_play_copywriting
+    file_path_arr, audio_path_arr, play_list_arr, continuous_play_num_arr, max_play_time_arr = all_data_reload(file_path_arr, audio_path_arr, play_list_arr, continuous_play_num_arr, max_play_time_arr)
+  File "D:\Python\project\AI-Vtuber\utils\audio.py", line 1715, in all_data_reload
+    for copywriting_config in copywriting_configs:
+TypeError: 'NoneType' object is not iterable
+
+2025-06-17 23:10:50.826 | INFO     | utils.my_handle:config_load:528 - 创建数据库:data/data.db
+2025-06-17 23:10:50.830 | INFO     | utils.my_handle:__init__:178 - 配置数据加载成功。
+2025-06-17 23:10:50.831 | INFO     | utils.my_handle:start_timers:428 - 启动 周期性触发 定时器
+2025-06-17 23:10:50.832 | INFO     | __main__:start_server:313 - 当前平台：bilibili2
+2025-06-17 23:10:50.972 | INFO     | __main__:http_api_thread:294 - HTTP API线程已启动！
+2025-06-17 23:14:06.498 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:14:50.564 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:14:50.565 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:15:14.406 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:15:19.990 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:15:19.991 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:15:21.758 | INFO     | utils.my_handle:__init__:109 - 初始化My_handle...
+2025-06-17 23:15:22.417 | INFO     | utils.my_handle:config_load:483 - ./log/log-2025-6-17.txt 日志文件已存在，跳过
+2025-06-17 23:15:22.418 | INFO     | utils.audio:message_queue_thread:241 - 创建音频合成消息队列线程
+2025-06-17 23:15:22.694 | INFO     | utils.my_handle:config_load:492 - ./log/comment-2025-6-17.txt 弹幕文件已存在，跳过
+2025-06-17 23:15:22.696 | INFO     | utils.my_handle:config_load:528 - 创建数据库:data/data.db
+2025-06-17 23:15:22.698 | INFO     | utils.my_handle:__init__:178 - 配置数据加载成功。
+2025-06-17 23:15:22.700 | INFO     | utils.my_handle:start_timers:428 - 启动 周期性触发 定时器
+2025-06-17 23:15:22.700 | INFO     | __main__:start_server:313 - 当前平台：bilibili2
+2025-06-17 23:15:22.863 | INFO     | __main__:http_api_thread:294 - HTTP API线程已启动！
+2025-06-17 23:15:51.919 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:15:55.402 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:15:55.403 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:15:57.177 | INFO     | utils.my_handle:__init__:109 - 初始化My_handle...
+2025-06-17 23:15:57.867 | INFO     | utils.my_handle:config_load:483 - ./log/log-2025-6-17.txt 日志文件已存在，跳过
+2025-06-17 23:15:57.868 | INFO     | utils.audio:message_queue_thread:241 - 创建音频合成消息队列线程
+2025-06-17 23:15:57.986 | INFO     | utils.my_handle:config_load:492 - ./log/comment-2025-6-17.txt 弹幕文件已存在，跳过
+2025-06-17 23:15:57.988 | INFO     | utils.my_handle:config_load:528 - 创建数据库:data/data.db
+2025-06-17 23:15:57.992 | INFO     | utils.my_handle:__init__:178 - 配置数据加载成功。
+2025-06-17 23:15:57.993 | INFO     | utils.my_handle:start_timers:428 - 启动 周期性触发 定时器
+2025-06-17 23:15:57.994 | INFO     | __main__:start_server:313 - 当前平台：bilibili2
+2025-06-17 23:15:58.161 | INFO     | __main__:http_api_thread:294 - HTTP API线程已启动！
+2025-06-17 23:17:56.373 | INFO     | utils.audio:__init__:78 - 文案模式的Audio初始化...
+2025-06-17 23:18:00.288 | INFO     | __main__:start_programs:219 - 运行程序: main
+2025-06-17 23:18:00.290 | INFO     | __main__:run_external_program:289 - 程序开始运行
+2025-06-17 23:18:02.055 | INFO     | utils.my_handle:__init__:109 - 初始化My_handle...
+2025-06-17 23:18:02.706 | INFO     | utils.my_handle:config_load:483 - ./log/log-2025-6-17.txt 日志文件已存在，跳过
+2025-06-17 23:18:02.706 | INFO     | utils.audio:message_queue_thread:241 - 创建音频合成消息队列线程
+2025-06-17 23:18:02.826 | INFO     | utils.my_handle:config_load:492 - ./log/comment-2025-6-17.txt 弹幕文件已存在，跳过
+2025-06-17 23:18:02.828 | INFO     | utils.my_handle:config_load:528 - 创建数据库:data/data.db
+2025-06-17 23:18:02.831 | INFO     | utils.my_handle:__init__:178 - 配置数据加载成功。
+2025-06-17 23:18:02.832 | INFO     | utils.my_handle:start_timers:428 - 启动 周期性触发 定时器
+2025-06-17 23:18:02.833 | INFO     | __main__:start_server:313 - 当前平台：bilibili2
+2025-06-17 23:18:02.993 | INFO     | __main__:http_api_thread:294 - HTTP API线程已启动！
+2025-06-17 23:18:45.670 | ERROR    | utils.common:send_async_request:1387 - Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 980, in _wrap_create_connection
+    return await self._loop.create_connection(*args, **kwargs)  # type: ignore[return-value]  # noqa
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 1076, in create_connection
+    raise exceptions[0]
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 1060, in create_connection
+    sock = await self._connect_sock(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 969, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\proactor_events.py", line 709, in sock_connect
+    return await self._proactor.connect(sock, address)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\windows_events.py", line 826, in _poll
+    value = callback(transferred, key, ov)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\windows_events.py", line 613, in finish_connect
+    ov.getresult()
+ConnectionRefusedError: [WinError 1225] 远程计算机拒绝网络连接。
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\utils\common.py", line 1371, in send_async_request
+    async with session.post(url, headers=headers, data=json.dumps(json_data), timeout=timeout, proxy=proxy) as response:
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\client.py", line 1167, in __aenter__
+    self._resp = await self._coro
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\client.py", line 562, in _request
+    conn = await self._connector.connect(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 901, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 1209, in _create_direct_connection
+    raise last_exc
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 1178, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 988, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host 127.0.0.1:8000 ssl:default [远程计算机拒绝网络连接。]
+
+2025-06-17 23:18:45.672 | ERROR    | utils.common:send_async_request:1388 - 请求出错: Cannot connect to host 127.0.0.1:8000 ssl:default [远程计算机拒绝网络连接。]
+2025-06-17 23:18:45.673 | INFO     | __main__:gsvi_set_init:379 - None
+2025-06-17 23:18:45.675 | ERROR    | __main__:gsvi_set_init:438 - Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\webui.py", line 382, in gsvi_set_init
+    model_names = list(resp_json["models"].keys())
+TypeError: 'NoneType' object is not subscriptable
+
+2025-06-17 23:18:45.677 | ERROR    | __main__:gsvi_set_init:439 - GSVI未知错误: 'NoneType' object is not subscriptable
+2025-06-17 23:18:48.039 | ERROR    | utils.common:send_async_request:1387 - Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 980, in _wrap_create_connection
+    return await self._loop.create_connection(*args, **kwargs)  # type: ignore[return-value]  # noqa
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 1076, in create_connection
+    raise exceptions[0]
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 1060, in create_connection
+    sock = await self._connect_sock(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\base_events.py", line 969, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\proactor_events.py", line 709, in sock_connect
+    return await self._proactor.connect(sock, address)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\windows_events.py", line 826, in _poll
+    value = callback(transferred, key, ov)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\asyncio\windows_events.py", line 613, in finish_connect
+    ov.getresult()
+ConnectionRefusedError: [WinError 1225] 远程计算机拒绝网络连接。
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\utils\common.py", line 1371, in send_async_request
+    async with session.post(url, headers=headers, data=json.dumps(json_data), timeout=timeout, proxy=proxy) as response:
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\client.py", line 1167, in __aenter__
+    self._resp = await self._coro
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\client.py", line 562, in _request
+    conn = await self._connector.connect(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 540, in connect
+    proto = await self._create_connection(req, traces, timeout)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 901, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 1209, in _create_direct_connection
+    raise last_exc
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 1178, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+  File "d:\Python\project\AI-Vtuber\Miniconda3\lib\site-packages\aiohttp\connector.py", line 988, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host 127.0.0.1:8000 ssl:default [远程计算机拒绝网络连接。]
+
+2025-06-17 23:18:48.043 | ERROR    | utils.common:send_async_request:1388 - 请求出错: Cannot connect to host 127.0.0.1:8000 ssl:default [远程计算机拒绝网络连接。]
+2025-06-17 23:18:48.046 | INFO     | __main__:gsvi_set_init:379 - None
+2025-06-17 23:18:48.048 | ERROR    | __main__:gsvi_set_init:438 - Traceback (most recent call last):
+  File "d:\Python\project\AI-Vtuber\webui.py", line 382, in gsvi_set_init
+    model_names = list(resp_json["models"].keys())
+TypeError: 'NoneType' object is not subscriptable
+
+2025-06-17 23:18:48.051 | ERROR    | __main__:gsvi_set_init:439 - GSVI未知错误: 'NoneType' object is not subscriptable
+2025-06-17 23:19:09.281 | INFO     | __main__:save_config:1633 - 配置数据已成功写入文件！
+2025-06-17 23:19:10.399 | WARNING  | __main__:tts_common_audio_synthesis:2082 - 音频合成中，将会阻塞其他任务运行，请勿做其他操作，查看日志情况，耐心等待
+2025-06-17 23:19:12.444 | INFO     | __main__:tts_common_audio_synthesis:2091 - 音频合成成功，存储于：D:\Python\project\AI-Vtuber\out\edge_tts_2.mp3

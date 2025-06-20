@@ -28,18 +28,6 @@ def start_listen(config, common, my_handle, platform: str):
             bilibili_cookie = config.get("bilibili", "cookie")
             SESSDATA = common.parse_cookie_data(bilibili_cookie, "SESSDATA")
             # logger.info(f"SESSDATA={SESSDATA}")
-        elif config.get("bilibili", "login_type") == "open_live":
-            # 在开放平台申请的开发者密钥 https://open-live.bilibili.com/open-manage
-            ACCESS_KEY_ID = config.get("bilibili", "open_live", "ACCESS_KEY_ID")
-            ACCESS_KEY_SECRET = config.get(
-                "bilibili", "open_live", "ACCESS_KEY_SECRET"
-            )
-            # 在开放平台创建的项目ID
-            APP_ID = config.get("bilibili", "open_live", "APP_ID")
-            # 主播身份码 直播中心获取
-            ROOM_OWNER_AUTH_CODE = config.get(
-                "bilibili", "open_live", "ROOM_OWNER_AUTH_CODE"
-            )
 
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -48,16 +36,12 @@ def start_listen(config, common, my_handle, platform: str):
     async def main_func():
         global session
         
-        if config.get("bilibili", "login_type") == "open_live":
-            await run_single_client2()
-        else:
-            try:
-                init_session()
+        try:
+            init_session()
 
-                await run_single_client()
-                await run_multi_clients()
-            finally:
-                await session.close()
+            await run_single_client()
+        finally:
+            await session.close()
 
     def init_session():
         global session
@@ -95,48 +79,6 @@ def start_listen(config, common, my_handle, platform: str):
         finally:
             await client.stop_and_close()
 
-    async def run_single_client2():
-        """
-        演示监听一个直播间 开放平台
-        """
-        client = blivedm.OpenLiveClient(
-            access_key_id=ACCESS_KEY_ID,
-            access_key_secret=ACCESS_KEY_SECRET,
-            app_id=APP_ID,
-            room_owner_auth_code=ROOM_OWNER_AUTH_CODE,
-        )
-        handler = MyHandler2()
-        client.set_handler(handler)
-
-        client.start()
-        try:
-            # 演示70秒后停止
-            # await asyncio.sleep(70)
-            # client.stop()
-
-            await client.join()
-        finally:
-            await client.stop_and_close()
-
-    async def run_multi_clients():
-        """
-        演示同时监听多个直播间
-        """
-        global session
-        
-        clients = [
-            blivedm.BLiveClient(room_id, session=session)
-            for room_id in TEST_ROOM_IDS
-        ]
-        handler = MyHandler()
-        for client in clients:
-            client.set_handler(handler)
-            client.start()
-
-        try:
-            await asyncio.gather(*(client.join() for client in clients))
-        finally:
-            await asyncio.gather(*(client.stop_and_close() for client in clients))
 
     class MyHandler(blivedm.BaseHandler):
         # 演示如何添加自定义回调
@@ -340,7 +282,6 @@ def start_listen(config, common, my_handle, platform: str):
 
         def _on_open_live_super_chat(
             self,
-            client: blivedm.OpenLiveClient,
             message: open_models.SuperChatMessage,
         ):
             my_global.idle_time_auto_clear(config, "gift")
@@ -374,7 +315,6 @@ def start_listen(config, common, my_handle, platform: str):
 
         def _on_open_live_super_chat_delete(
             self,
-            client: blivedm.OpenLiveClient,
             message: open_models.SuperChatDeleteMessage,
         ):
             logger.info(

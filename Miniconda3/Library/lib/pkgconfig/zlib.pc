@@ -1,0 +1,13 @@
+prefix=D:/GitHub_pro/AI-Vtuber-20230629/conda/Library
+exec_prefix=D:/GitHub_pro/AI-Vtuber-20230629/conda/Library
+libdir=D:/GitHub_pro/AI-Vtuber-20230629/conda/Library/lib
+sharedlibdir=D:/GitHub_pro/AI-Vtuber-20230629/conda/Library/lib
+includedir=D:/GitHub_pro/AI-Vtuber-20230629/conda/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
