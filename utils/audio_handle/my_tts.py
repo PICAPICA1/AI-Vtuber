@@ -68,7 +68,7 @@ class MY_TTS:
             encoded_audio = base64.b64encode(audio_data).decode('utf-8')
         return encoded_audio
 
-    async def download_audio(self, type: str, file_url: str, timeout: int=30, request_type: str="get", data=None, json_data=None, audio_suffix: str="wav"):
+    async def download_audio(self, type: str, file_url: str, timeout: int=30, request_type: str="post", data=None, json_data=None, audio_suffix: str="wav"):
         async with aiohttp.ClientSession() as session:
             try:
                 if request_type == "get":
@@ -98,18 +98,20 @@ class MY_TTS:
             except asyncio.TimeoutError:
                 logger.error("{type} 下载音频超时")
                 return None
-    async def gsvi_voice_path(self, file_url, json_data):
-            try:
-                resp_json = await Common.send_async_request(self,file_url,"POST", json_data , resp_data_type="json")
-                if resp_json is None:
-                    logger.error(f'{type} 获取音频失败: {resp_json}')
-                    return None
-                else:
-                    logger.success(resp_json["msg"])
-                    return resp_json["audio_url"]
-            except asyncio.TimeoutError:
-                logger.error("获取音频超时")
-                return None
+            
+
+    # async def gsvi_voice_path(self, file_url, json_data):
+    #         try:
+    #             resp_json = await Common.send_async_request(self,file_url,"POST", json_data , resp_data_type="json")
+    #             if resp_json is None:
+    #                 logger.error(f'{type} 获取音频失败: {resp_json}')
+    #                 return None
+    #             else:
+    #                 logger.success(resp_json["msg"])
+    #                 return resp_json["audio_url"]
+    #         except asyncio.TimeoutError:
+    #             logger.error("获取音频超时")
+    #             return None
 
 
     # 请求Edge-TTS接口获取合成后的音频路径
@@ -151,17 +153,15 @@ class MY_TTS:
                 # text: str = ""
                 # text_lang: str = ""
             data_json = {
-
-                "model_name": data["model_name"],
-                "prompt_text_lang": data["prompt_text_lang"],
-                "emotion": data["emotion"],
-                "text": data["content"],
-                "text_lang": data["text_lang"],
-                
+                "voice": data["model_name"],
+                "input": data["content"],
+                "model": data["model"],
+                "emoition": "默认"  
             }
             API_URL = urljoin(data["api_ip_port"], '/v1/audio/speech')
 
-            return await self.gsvi_voice_path(API_URL, data_json)
+            # return await self.gsvi_voice_path(API_URL, data_json)
+            return await self.download_audio("gsvi", API_URL, self.timeout, "post", None, data_json)
 
         except Exception as e:
             logger.error(traceback.format_exc())

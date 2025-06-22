@@ -921,19 +921,19 @@ class My_handle(metaclass=SingletonMeta):
 
                 
 
-            # 音频合成时需要用到的重要数据
-            message = {
-                "type": "comment",
-                "tts_type": My_handle.config.get("audio_synthesis_type"),
-                "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
-                "config": My_handle.config.get("filter"),
-                "username": username,
-                "content": content
-            }
+            # # 音频合成时需要用到的重要数据
+            # message = {
+            #     "type": "comment",
+            #     "tts_type": My_handle.config.get("audio_synthesis_type"),
+            #     "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
+            #     "config": My_handle.config.get("filter"),
+            #     "username": username,
+            #     "content": content
+            # }
 
 
-            # 合成音频
-            self.audio_synthesis_handle(message)
+            # # 合成音频
+            # self.audio_synthesis_handle(message)
 
             return message
         except Exception as e:

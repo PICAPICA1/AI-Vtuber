@@ -95,6 +95,7 @@ class Audio:
 
         # 音频合成单独一个线程排队播放
         threading.Thread(target=lambda: asyncio.run(self.only_play_audio())).start()
+        print("only_play_audio线程已创建")
         # self.only_play_audio_thread = threading.Thread(target=self.only_play_audio)
         # self.only_play_audio_thread.start()
 
@@ -102,9 +103,6 @@ class Audio:
 
         Audio.audio_player =  AUDIO_PLAYER(self.config.get("audio_player"))
 
-        # 虚拟身体部分
-        if self.config.get("visual_body") == "live2d-TTS-LLM-GPT-SoVITS-Vtuber":
-            pass
 
     # 判断 等待合成消息队列|待播放音频队列 数是否小于或大于某个值，就返回True
     def is_queue_less_or_greater_than(self, type: str="message_queue", less: int=None, greater: int=None):
@@ -480,10 +478,11 @@ class Audio:
                     "content": message["content"],
                     "api_ip_port": self.config.get("gsvi", "api_ip_port"),
                     "model_name": self.config.get("gsvi", "model_name"),
-                    "prompt_text_lang": self.config.get("gsvi", "prompt_text_lang"),
-                    "emotion": self.config.get("gsvi", "emotion"),
-                    "text_lang": self.config.get("gsvi", "text_lang"),
-                    "dl_url": self.config.get("gsvi", "dl_url"),
+                    "model" : self.config.get("gsvi", "model"),
+                    # "prompt_text_lang": self.config.get("gsvi", "prompt_text_lang"),
+                    # "emotion": self.config.get("gsvi", "emotion"),
+                    # "text_lang": self.config.get("gsvi", "text_lang"),
+                    # "dl_url": self.config.get("gsvi", "dl_url"),
                 }
 
                 voice_tmp_path = await self.my_tts.gsvi_api(data)
@@ -608,7 +607,6 @@ class Audio:
 
         try:
             logger.debug(f"合成音频前的原始数据：{message['content']}")
-            # message["content"] = self.common.remove_extra_words(message["content"], message["config"]["max_len"], message["config"]["max_char_len"])
             # logger.info("裁剪后的合成文本:" + text)
 
             message["content"] = message["content"].replace('\n', '。')
@@ -621,11 +619,41 @@ class Audio:
             return
         
 
+        # 判断消息类型，再变声并封装数据发到队列 减少冗余
+        async def voice_change_and_put_to_queue(message, voice_tmp_path):
+            # 拼接json数据，存入队列
+            data_json = {
+                "type": message['type'],
+                "voice_path": voice_tmp_path,
+                "content": message["content"]
+            }
+
+
+            # 区分消息类型是否是 回复xxx 并且 关闭了变声
+            if message["type"] == "reply":
+                # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
+                if self.config.get("play_audio", "enable"):
+                    self.data_priority_insert("待播放音频列表", data_json)
+                    return True
+            # 区分消息类型是否是 念弹幕 并且 关闭了变声
+            elif message["type"] == "read_comment" and not self.config.get("read_comment", "voice_change"):
+                # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
+                if self.config.get("play_audio", "enable"):
+                    self.data_priority_insert("待播放音频列表", data_json)
+                    return True
+
+            
+            # 更新音频路径
+            data_json["voice_path"] = voice_tmp_path
+
+            # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
+            if self.config.get("play_audio", "enable"):
+                self.data_priority_insert("待播放音频列表", data_json)
+
+            return True
+
 
         resp_json = await self.tts_handle(message)
-
-        # logger.info(message)
-
         if resp_json["result"]["code"] == 200:
             voice_tmp_path = resp_json["result"]["audio_path"]
         else:
@@ -639,64 +667,9 @@ class Audio:
         
         logger.info(f"[{message['tts_type']}]合成成功，合成内容：【{message['content']}】，音频存储在 {voice_tmp_path}")
                  
+        await voice_change_and_put_to_queue(message, voice_tmp_path)  
 
         return True
-
-    # 音频变速
-    def audio_speed_change(self, audio_path, speed_factor=1.0, pitch_factor=1.0):
-        """音频变速
-
-        Args:
-            audio_path (str): 音频路径
-            speed (int, optional): 部分速度倍率.  默认 1.
-            type (int, optional): 变调倍率 1为不变调.  默认 1.
-
-        Returns:
-            str: 变速后的音频路径
-        """
-        logger.debug(f"audio_path={audio_path}, speed_factor={speed_factor}, pitch_factor={pitch_factor}")
-
-        # 使用 pydub 打开音频文件
-        audio = AudioSegment.from_file(audio_path)
-
-        # 变速
-        if speed_factor > 1.0:
-            audio_changed = audio.speedup(playback_speed=speed_factor)
-        elif speed_factor < 1.0:
-            # 如果要放慢,使用set_frame_rate调帧率
-            orig_frame_rate = audio.frame_rate
-            slow_frame_rate = int(orig_frame_rate * speed_factor)
-            audio_changed = audio._spawn(audio.raw_data, overrides={"frame_rate": slow_frame_rate})
-        else:
-            audio_changed = audio
-
-        # 变调
-        if pitch_factor != 1.0:
-            semitones = 12 * (pitch_factor - 1)
-            audio_changed = audio_changed._spawn(audio_changed.raw_data, overrides={
-                "frame_rate": int(audio_changed.frame_rate * (2.0 ** (semitones / 12.0)))
-            }).set_frame_rate(audio_changed.frame_rate)
-
-        # 变速
-        # audio_changed = audio.speedup(playback_speed=speed_factor)
-
-
-
-        # 导出为临时文件
-        audio_out_path = self.config.get("play_audio", "out_path")
-        if not os.path.isabs(audio_out_path):
-            if not audio_out_path.startswith('./'):
-                audio_out_path = './' + audio_out_path
-        file_name = f"temp_{self.common.get_bj_time(4)}.wav"
-        temp_path = self.common.get_new_audio_path(audio_out_path, file_name)
-
-        # 导出为新音频文件
-        audio_changed.export(temp_path, format="wav")
-
-        # 转换为绝对路径
-        temp_path = os.path.abspath(temp_path)
-
-        return temp_path
 
 
     # 只进行普通音频播放   
@@ -719,10 +692,9 @@ class Audio:
                             # 消费者在消费完一个消息后，如果列表为空，则调用wait()方法阻塞自己，直到有新消息到来
                             Audio.voice_tmp_path_queue_not_empty.wait()  # 阻塞直到列表非空
                         data_json = Audio.voice_tmp_path_queue.pop(0)
-                    
-                    logger.debug(f"普通音频播放队列 即将播放音频 data_json={data_json}")
 
-                    voice_tmp_path = data_json["voice_path"]
+                    voice_tmp_path = data_json.get("voice_path")
+
 
                     # 如果文案标志位为2，则说明在播放中，需要暂停
                     if Audio.copywriting_play_flag == 2:
@@ -743,19 +715,13 @@ class Audio:
                     interval_num = int(self.common.get_random_value(interval_num_min, interval_num_max))
 
                     for i in range(interval_num):
-                        # 不仅仅是说话间隔，还是等待文本捕获刷新数据
                         await asyncio.sleep(normal_interval)
 
-                    # 音频变速
-                    random_speed = 1
-                    if self.config.get("audio_random_speed", "normal", "enable"):
-                        random_speed = self.common.get_random_value(self.config.get("audio_random_speed", "normal", "speed_min"),
-                                                                    self.config.get("audio_random_speed", "normal", "speed_max"))
-                        voice_tmp_path = self.audio_speed_change(voice_tmp_path, random_speed)
+                   
 
                     # print(voice_tmp_path)
 
-                   
+                    
                     else:
                         # 根据播放器类型进行区分
                         if self.config.get("play_audio", "player") in ["audio_player", "audio_player_v2"]:
@@ -795,8 +761,7 @@ class Audio:
                                 Audio.mixer_normal.music.play()
                                 while Audio.mixer_normal.music.get_busy():
                                     pygame.time.Clock().tick(10)
-                                Audio.mixer_normal.music.stop()
-                                
+                                Audio.mixer_normal.music.stop()          
                                 await self.send_audio_play_info_to_callback()
                             except pygame.error as e:
                                 logger.error(traceback.format_exc())
@@ -808,14 +773,12 @@ class Audio:
                         # 清空字幕文件
                         # self.common.write_content_to_file(captions_config["file_path"], "")
 
-                    if Audio.copywriting_play_flag == 1:
-                        # 延时执行恢复文案播放
-                        self.delayed_execution_unpause_copywriting_play()
                 except Exception as e:
                     logger.error(traceback.format_exc())
             Audio.mixer_normal.quit()
         except Exception as e:
             logger.error(traceback.format_exc())
+            print("only_play_audio线程异常", e)
 
 
     # 停止当前播放的音频
@@ -850,13 +813,11 @@ class Audio:
 
         elif audio_synthesis_type == "gsvi":
             data = {
-                "content": content,
-                "api_ip_port": self.config.get("gsvi", "api_ip_port"),
-                "model_name": self.config.get("gsvi", "model_name"),
-                "prompt_text_lang": self.config.get("gsvi", "prompt_text_lang"),
-                "emotion": self.config.get("gsvi", "emotion"),
-                "text_lang": self.config.get("gsvi", "text_lang"),
-                "dl_url": self.config.get("gsvi", "dl_url"),
+                
+                    "content": content,
+                    "api_ip_port": self.config.get("gsvi", "api_ip_port"),
+                    "model_name": self.config.get("gsvi", "model_name"),
+                    "model" : self.config.get("gsvi", "model"),      
             }
             voice_tmp_path = await self.my_tts.gsvi_api(data)
         
