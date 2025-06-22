@@ -198,25 +198,6 @@ def start_server():
                     logger.error(f"发送数据失败！{e}")
                     return CommonResult(code=-1, message=f"发送数据失败！{e}")
 
-            @app.post("/llm")
-            async def llm(msg: LLMMessage):
-                global my_handle, config
-
-                try:
-                    data_json = msg.dict()
-                    logger.info(f"API收到数据：{data_json}")
-
-                    resp_content = my_handle.llm_handle(
-                        data_json["type"], data_json, webui_show=False
-                    )
-
-                    return CommonResult(
-                        code=200, message="成功", data={"content": resp_content}
-                    )
-                except Exception as e:
-                    logger.error(f"调用LLM失败！{e}")
-                    return CommonResult(code=-1, message=f"调用LLM失败！{e}")
-
             from starlette.requests import Request
 
             @app.post('/tts')
@@ -315,6 +296,7 @@ def start_server():
 
     if platform == "bilibili2":
         from utils.platforms.bilibili2 import start_listen
+        start_listen(config, common, my_handle, platform)
 
 
 

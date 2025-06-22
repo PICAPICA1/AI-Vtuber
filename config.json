@@ -2,7 +2,7 @@
   "api_ip": "127.0.0.1",
   "api_port": 8082,
   "platform": "bilibili2",
-  "room_display_id": "32059961",
+  "room_display_id": "931522",
   "chat_type": "none",
   "need_lang": "none",
   "before_prompt": "请简要回复:",
@@ -40,18 +40,22 @@
     "login_type": "cookie",
     "username": "",
     "password": "",
-    "cookie": "buvid4=3337621A-2CE5-225C-52B9-4743CC941C0281551-023081221-LS54sCQW2jN4aCkeGx1anw%3D%3D; header_theme_version=CLOSE; buvid_fp_plain=undefined; enable_web_push=DISABLE; DedeUserID=234102953; DedeUserID__ckMd5=e1ca2623a810951a; CURRENT_QUALITY=80; buvid3=7B21E89A-9909-6265-676B-496559FDA60855816infoc; b_nut=1723386155; _uuid=4537954C-214E-C6A6-BE5B-EFF710D1C555E38743infoc; rpdid=|(u)~mY|lklk0J'u~kYRmkJll; LIVE_BUVID=AUTO7417369516908639; hit-dyn-v2=1; enable_feed_channel=ENABLE; fingerprint=ad64619323278efcbe317e876cc5f7e9; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAwNzIxNzYsImlhdCI6MTc0OTgxMjkxNiwicGx0IjotMX0.zpOQ_8TtnRf7VHfEEB_ovRDAWFZxk4QiEyHdtpV1fQc; bili_ticket_expires=1750072116; buvid_fp=ad64619323278efcbe317e876cc5f7e9; bmg_af_switch=1; bmg_src_def_domain=i1.hdslb.com; bp_t_offset_234102953=1078206030187331584; PVID=4; b_lsid=C91F6394_1976E73280A; SESSDATA=c465393a%2C1765459413%2C88087%2A62CjBRGHAYmx18YC1sKZLqFhE2zAdX-lJ1p6lLqt5PpMErgKN54tGdyFFyEHZTXhYASAMSVmN3bWdWMGhENS1JOGFIQUFpQ2puRURQWjZoNXZrYnV5RHJobDZaZXlyUzBJOXdMTHJtNUtsOWZ1NGpPeW8wXzRwaWdMN0pQUE1hazBIZ3hnMFFiWVpnIIEC; bili_jct=0a2368b8fb156ff7a1ad25b687761d19; sid=56rwwfa3; CURRENT_FNVAL=4048; home_feed_column=4; browser_resolution=1260-954",
+    "cookie": "buvid4=3337621A-2CE5-225C-52B9-4743CC941C0281551-023081221-LS54sCQW2jN4aCkeGx1anw%3D%3D; header_theme_version=CLOSE; buvid_fp_plain=undefined; enable_web_push=DISABLE; DedeUserID=234102953; DedeUserID__ckMd5=e1ca2623a810951a; CURRENT_QUALITY=80; buvid3=7B21E89A-9909-6265-676B-496559FDA60855816infoc; b_nut=1723386155; _uuid=4537954C-214E-C6A6-BE5B-EFF710D1C555E38743infoc; rpdid=|(u)~mY|lklk0J'u~kYRmkJll; LIVE_BUVID=AUTO7417369516908639; hit-dyn-v2=1; enable_feed_channel=ENABLE; fingerprint=ad64619323278efcbe317e876cc5f7e9; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTA1OTc0MzYsImlhdCI6MTc1MDMzODE3NiwicGx0IjotMX0.3-p8bsp3ZFStGZ4WIXn3XFadB4mm9-szLBLqLCTJX14; bili_ticket_expires=1750597376; SESSDATA=4c5f22ea%2C1765890236%2Cc69b6%2A62CjAwyBIeTWxn5hp-m2cxJlE1edgckDkYM8LkuJsLRgahML4c8NtzYKinQbmxVdI5gSQSVkRyY3V5YkY4aXFqMVBkWUVuYzAxUkVzamhQNEVvR1ZUZHN4dklsSmNhYzlCaUxWTFMxdk5VR28zMGNzQ2ZlMUVyd1hZWjRNWHFtTExjRW5fc21vTUtRIIEC; bili_jct=a56c07253849d963ce0bcf7fd23ffad0; buvid_fp=ad64619323278efcbe317e876cc5f7e9; bmg_af_switch=1; bmg_src_def_domain=i1.hdslb.com; sid=4tgntql0; b_lsid=8510A6AD4_197966A4A3E; CURRENT_FNVAL=2000; PVID=2; home_feed_column=4; browser_resolution=1258-954; bp_t_offset_234102953=1081204574489935872",
     "ac_time_value": "",
     "open_live": {
       "ACCESS_KEY_ID": "",
       "ACCESS_KEY_SECRET": "",
       "APP_ID": 0,
       "ROOM_OWNER_AUTH_CODE": ""
+    },
+    "filter": {
+      "emoji": false,
+      "username_convert_digits_to_chinese": true
+    },
+    "blacklist": {
+      "enable": false,
+      "username": []
     }
-  },
-  "ordinaryroad_barrage_fly": {
-    "ws_ip_port": "ws://127.0.0.1:9898",
-    "taskIds": []
   },
   "read_comment": {
     "enable": true,
@@ -183,7 +187,7 @@
     },
     "lowest_price": 0.1
   },
-  "audio_synthesis_type": "gsvi",
+  "audio_synthesis_type": "edge-tts",
   "audio_random_speed": {
     "normal": {
       "enable": false,
@@ -789,7 +793,7 @@
     }
   },
   "webui": {
-    "ip": "127.0.0.1",
+    "ip": "127.0.1.1",
     "port": 8081,
     "title": "AI Vtuber",
     "auto_run": false,

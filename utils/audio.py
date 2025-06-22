@@ -400,6 +400,7 @@ class Audio:
             if self.config.get("filter", "username_convert_digits_to_chinese"):
                 if message["username"] is not None:
                     message["username"] = self.common.convert_digits_to_chinese(message["username"])
+            
 
             # 异常报警
             elif message['type'] == "abnormal_alarm":
@@ -419,7 +420,17 @@ class Audio:
                     self.data_priority_insert("等待合成消息", data_json)
                 return
 
-
+            # 是否语句切分
+            if self.config.get("play_audio", "text_split_enable"):
+                sentences = self.common.split_sentences(message['content'])
+                for s in sentences:
+                    message_copy = deepcopy(message)  # 创建 message 的副本
+                    message_copy["content"] = s  # 修改副本的 content
+                    logger.debug(f"s={s}")
+                    if not self.common.is_all_space_and_punct(s):
+                        self.data_priority_insert("等待合成消息", message_copy)  # 将副本放入队列中
+            else:
+                self.data_priority_insert("等待合成消息", message)
             # 单独开线程播放
             # threading.Thread(target=self.my_play_voice, args=(type, data, config, content,)).start()
         except Exception as e:
@@ -597,7 +608,7 @@ class Audio:
 
         try:
             logger.debug(f"合成音频前的原始数据：{message['content']}")
-            message["content"] = self.common.remove_extra_words(message["content"], message["config"]["max_len"], message["config"]["max_char_len"])
+            # message["content"] = self.common.remove_extra_words(message["content"], message["config"]["max_len"], message["config"]["max_char_len"])
             # logger.info("裁剪后的合成文本:" + text)
 
             message["content"] = message["content"].replace('\n', '。')
@@ -610,45 +621,10 @@ class Audio:
             return
         
 
-        # 判断消息类型，再变声并封装数据发到队列 减少冗余
-        async def voice_change_and_put_to_queue(message, voice_tmp_path):
-            # 拼接json数据，存入队列
-            data_json = {
-                "type": message['type'],
-                "voice_path": voice_tmp_path,
-                "content": message["content"]
-            }
-
-            if "insert_index" in message:
-                data_json["insert_index"] = message["insert_index"]
-
-            # 区分消息类型是否是 回复xxx 并且 关闭了变声
-            if message["type"] == "reply":
-                # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
-                if self.config.get("play_audio", "enable"):
-                    self.data_priority_insert("待播放音频列表", data_json)
-                    return True
-            # 区分消息类型是否是 念弹幕 并且 关闭了变声
-            elif message["type"] == "read_comment" and not self.config.get("read_comment", "voice_change"):
-                # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
-                if self.config.get("play_audio", "enable"):
-                    self.data_priority_insert("待播放音频列表", data_json)
-                    return True
-                
-            voice_tmp_path = await self.voice_change(voice_tmp_path)
-            
-            # 更新音频路径
-            data_json["voice_path"] = voice_tmp_path
-
-            # 是否开启了音频播放，如果没开，则不会传文件路径给播放队列
-            if self.config.get("play_audio", "enable"):
-                self.data_priority_insert("待播放音频列表", data_json)
-
-            return True
 
         resp_json = await self.tts_handle(message)
 
-        logger.info(message)
+        # logger.info(message)
 
         if resp_json["result"]["code"] == 200:
             voice_tmp_path = resp_json["result"]["audio_path"]
@@ -663,7 +639,6 @@ class Audio:
         
         logger.info(f"[{message['tts_type']}]合成成功，合成内容：【{message['content']}】，音频存储在 {voice_tmp_path}")
                  
-        await voice_change_and_put_to_queue(message, voice_tmp_path)  
 
         return True
 
@@ -705,12 +680,7 @@ class Audio:
         # 变速
         # audio_changed = audio.speedup(playback_speed=speed_factor)
 
-        # # 变调
-        # if pitch_factor != 1.0:
-        #     semitones = 12 * (pitch_factor - 1)
-        #     audio_changed = audio_changed._spawn(audio_changed.raw_data, overrides={
-        #         "frame_rate": int(audio_changed.frame_rate * (2.0 ** (semitones / 12.0)))
-        #     }).set_frame_rate(audio_changed.frame_rate)
+
 
         # 导出为临时文件
         audio_out_path = self.config.get("play_audio", "out_path")

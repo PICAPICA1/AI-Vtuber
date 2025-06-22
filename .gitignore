@@ -2,3 +2,5 @@ Minicinda3/
 .idea/
 .vscode/
 .git/
+out/
+log/
